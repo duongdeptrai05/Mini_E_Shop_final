@@ -22,7 +22,7 @@ import com.example.mini_e_shop.data.local.Converters
         OrderEntity::class,
         OrderItemEntity::class
     ],
-    version = 2,
+    version = 7, // Force database recreation
     exportSchema = false
 )
 @TypeConverters(Converters::class)

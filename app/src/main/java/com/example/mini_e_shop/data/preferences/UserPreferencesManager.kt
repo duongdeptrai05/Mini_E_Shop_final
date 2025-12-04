@@ -1,0 +1,72 @@
+package com.example.mini_e_shop.data.preferences
+
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import java.io.IOException
+import javax.inject.Inject
+import javax.inject.Singleton
+
+private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_settings")
+
+data class AuthPreferences(
+    val isLoggedIn: Boolean,
+    val loggedInUserId: Int,
+    val rememberMeEmail: String // For pre-filling the login form
+)
+
+@Singleton
+class UserPreferencesManager @Inject constructor(@ApplicationContext private val context: Context) {
+
+    private object PreferenceKeys {
+        val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
+        val LOGGED_IN_USER_ID = intPreferencesKey("logged_in_user_id")
+        val REMEMBER_ME_EMAIL = stringPreferencesKey("remember_me_email")
+    }
+
+    val authPreferencesFlow: Flow<AuthPreferences> = context.dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }.map { preferences ->
+            val isLoggedIn = preferences[PreferenceKeys.IS_LOGGED_IN] ?: false
+            val userId = preferences[PreferenceKeys.LOGGED_IN_USER_ID] ?: -1
+            val email = preferences[PreferenceKeys.REMEMBER_ME_EMAIL] ?: ""
+            AuthPreferences(isLoggedIn, userId, email)
+        }
+
+    suspend fun saveLoginState(userId: Int, email: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.IS_LOGGED_IN] = true
+            preferences[PreferenceKeys.LOGGED_IN_USER_ID] = userId
+            preferences[PreferenceKeys.REMEMBER_ME_EMAIL] = email // Always save email for convenience
+        }
+    }
+
+    suspend fun clearLoginState() {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.IS_LOGGED_IN] = false
+            preferences.remove(PreferenceKeys.LOGGED_IN_USER_ID)
+            // We might want to keep the email for user convenience, so we don't clear REMEMBER_ME_EMAIL
+        }
+    }
+
+    suspend fun saveRememberMeEmail(email: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferenceKeys.REMEMBER_ME_EMAIL] = email
+        }
+    }
+}

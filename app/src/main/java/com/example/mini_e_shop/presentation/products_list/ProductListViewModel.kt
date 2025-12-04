@@ -2,43 +2,75 @@ package com.example.mini_e_shop.presentation.products_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mini_e_shop.data.preferences.UserPreferencesManager
 import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.domain.repository.CartRepository
 import com.example.mini_e_shop.domain.repository.ProductRepository
-import com.example.mini_e_shop.presentation.main.MainViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ProductListViewModel @Inject constructor(
     private val productRepository: ProductRepository,
-    private val cartRepository: CartRepository
+    private val cartRepository: CartRepository,
+    private val userPreferencesManager: UserPreferencesManager
 ) : ViewModel() {
+
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery = _searchQuery.asStateFlow()
 
     private val _uiState = MutableStateFlow<ProductListUiState>(ProductListUiState.Loading)
     val uiState = _uiState.asStateFlow()
 
+    private val _userId = MutableStateFlow<Int?> (null)
+
     init {
         getProducts()
+        loadUserId()
     }
 
     private fun getProducts() {
+        // Combine the products flow with the search query flow
         productRepository.getAllProducts()
-            .onEach { products ->
-                _uiState.value = ProductListUiState.Success(products)
+            .combine(searchQuery) { products, query ->
+                if (query.isBlank()) {
+                    products // Return all products if query is empty
+                } else {
+                    products.filter { it.name.contains(query, ignoreCase = true) } // Filter by name
+                }
+            }
+            .onEach { filteredProducts ->
+                _uiState.value = ProductListUiState.Success(filteredProducts)
             }
             .catch { e ->
                 _uiState.value = ProductListUiState.Error(e.message ?: "Đã có lỗi không xác định xảy ra")
             }
             .launchIn(viewModelScope)
     }
-    // --- CÁC HÀM XỬ LÝ CHO ADMIN ---
+
+    private fun loadUserId() {
+        viewModelScope.launch {
+            val prefs = userPreferencesManager.authPreferencesFlow.first()
+            if (prefs.isLoggedIn) {
+                _userId.value = prefs.loggedInUserId
+            }
+        }
+    }
+
+    fun onSearchQueryChange(query: String) {
+        _searchQuery.value = query
+    }
+
     fun deleteProduct(product: Product) {
         viewModelScope.launch {
             try {
@@ -48,27 +80,22 @@ class ProductListViewModel @Inject constructor(
             }
         }
     }
-    // --- CÁC HÀM XỬ LÝ CHO USER ---
-    fun addToCart(product: Product, mainViewModel: MainViewModel) {
+
+    fun addToCart(product: Product) {
         viewModelScope.launch {
-            // Lấy userId từ MainViewModel
-            val userId = mainViewModel.currentUser.value?.id
-            if (userId != null) {
-                cartRepository.addProductToCart(product, userId)
+            val currentUserId = _userId.value
+            if (currentUserId != null) {
+                cartRepository.addProductToCart(product, currentUserId)
                 // TODO: Hiển thị thông báo "Đã thêm vào giỏ hàng"
             } else {
-                // TODO: Xử lý trường hợp không tìm thấy user
+                // TODO: Xử lý trường hợp không tìm thấy user (ví dụ: hiển thị thông báo yêu cầu đăng nhập)
             }
         }
     }
 
-    // 3. THÊM HÀM toggleFavorite (hiện tại chỉ là logic giả)
     fun toggleFavorite(product: Product) {
         viewModelScope.launch {
             // TODO: Triển khai logic cho chức năng Yêu thích
-            // Bước 1: Tạo FavoriteEntity và FavoriteDao
-            // Bước 2: Cập nhật FavoriteRepository
-            // Bước 3: Gọi repository ở đây để thêm/xóa sản phẩm khỏi danh sách yêu thích
             println("Toggled favorite for ${product.name}")
         }
     }

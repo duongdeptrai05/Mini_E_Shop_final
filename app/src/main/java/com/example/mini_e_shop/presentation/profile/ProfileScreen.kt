@@ -14,8 +14,6 @@ import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,25 +23,23 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mini_e_shop.domain.model.User
+import com.example.mini_e_shop.data.local.entity.UserEntity
 import com.example.mini_e_shop.ui.theme.GradientEnd
 import com.example.mini_e_shop.ui.theme.GradientStart
 import com.example.mini_e_shop.ui.theme.PrimaryPurple
 
 @Composable
 fun ProfileScreen(
-    viewModel: UserViewModel,
+    currentUser: UserEntity?, // Receive the UserEntity directly
     onNavigateToOrders: () -> Unit,
     onLogout: () -> Unit
 ) {
-    val user by viewModel.user.collectAsState()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF3F4F6))
     ) {
-        Header(user)
+        Header(currentUser)
         Spacer(modifier = Modifier.height(20.dp))
         Menu(onNavigateToOrders)
         Spacer(modifier = Modifier.height(20.dp))
@@ -52,7 +48,7 @@ fun ProfileScreen(
 }
 
 @Composable
-private fun Header(user: User?) {
+private fun Header(user: UserEntity?) {
     Box {
         Box(
             modifier = Modifier

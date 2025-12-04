@@ -19,22 +19,20 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.mini_e_shop.domain.model.Product
-import com.example.mini_e_shop.presentation.main.MainViewModel
 import com.example.mini_e_shop.ui.theme.PrimaryBlue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductListScreen(
     viewModel: ProductListViewModel,
-    mainViewModel: MainViewModel, // 1. NHẬN MainViewModel ĐỂ LẤY THÔNG TIN USER
     isAdmin: Boolean,
     onNavigateToAddEditProduct: (Int?) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val searchQuery by viewModel.searchQuery.collectAsState()
 
     Scaffold(
         topBar = {
@@ -57,7 +55,10 @@ fun ProductListScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            SearchBar()
+            SearchBar(
+                value = searchQuery,
+                onValueChange = { viewModel.onSearchQueryChange(it) }
+            )
             when (val state = uiState) {
                 is ProductListUiState.Loading -> {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -78,11 +79,9 @@ fun ProductListScreen(
                                 onEdit = { onNavigateToAddEditProduct(product.id) },
                                 onDelete = { viewModel.deleteProduct(product) },
                                 onClick = { /* TODO: Navigate to Product Detail Screen */ },
-                                // 2. SỬA LẠI CÁC LỜI GỌI HÀM
-                                onAddToCart = { viewModel.addToCart(product, mainViewModel) },
+                                onAddToCart = { viewModel.addToCart(product) },
                                 onToggleFavorite = { viewModel.toggleFavorite(product) },
-                                // 3. CUNG CẤP GIÁ TRỊ GIẢ CHO isFavorite
-                                isFavorite = false // TODO: Lấy trạng thái yêu thích thật từ ViewModel
+                                isFavorite = false // TODO: Get real favorite state from ViewModel
                             )
                         }
                     }
@@ -97,13 +96,11 @@ fun ProductListScreen(
     }
 }
 
-// Composable SearchBar và ProductCard giữ nguyên không đổi
-
 @Composable
-private fun SearchBar() {
+private fun SearchBar(value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
-        value = "",
-        onValueChange = {},
+        value = value,
+        onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         placeholder = { Text("Tìm kiếm sản phẩm...") },
         leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },

@@ -35,21 +35,17 @@ fun LoginScreen(
     onLoginSuccess: (UserEntity) -> Unit,
     onNavigateToRegister: () -> Unit
 ) {
-    // Quan sát trạng thái từ ViewModel
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
+    val rememberMe by viewModel.rememberMe.collectAsState()
     val loginState by viewModel.loginState.collectAsState()
 
-    // Hiệu ứng khi đăng nhập thành công
     LaunchedEffect(loginState) {
         when (val state = loginState) {
             is LoginViewModel.LoginState.Success -> {
-                // KHI THÀNH CÔNG, GỌI onLoginSuccess VÀ TRUYỀN DỮ LIỆU USER ĐI
                 onLoginSuccess(state.user)
             }
-            else -> {
-                // Không làm gì với các trạng thái khác
-            }
+            else -> {}
         }
     }
 
@@ -59,10 +55,8 @@ fun LoginScreen(
             .background(LightGray)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Phần Header với nền Gradient
             HeaderView()
 
-            // Phần Form Đăng nhập
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -75,17 +69,28 @@ fun LoginScreen(
                 Column(
                     modifier = Modifier.padding(24.dp)
                 ) {
-                    // Thanh chuyển đổi Đăng nhập / Đăng ký
                     AuthTabs(onRegisterClicked = onNavigateToRegister)
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Các trường nhập liệu
                     EmailField(value = email, onValueChange = { viewModel.onEmailChange(it) })
                     Spacer(modifier = Modifier.height(16.dp))
                     PasswordField(value = password, onValueChange = { viewModel.onPasswordChange(it) })
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(16.dp)) // Reduced spacer
 
-                    // Nút Đăng nhập
+                    // Remember Me Checkbox
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Checkbox(
+                            checked = rememberMe,
+                            onCheckedChange = { viewModel.onRememberMeChange(it) },
+                            colors = CheckboxDefaults.colors(checkedColor = PrimaryBlue)
+                        )
+                        Text("Ghi nhớ tài khoản", color = TextGray, fontSize = 14.sp)
+                    }
+                    Spacer(modifier = Modifier.height(24.dp)) // Reduced spacer
+
                     Button(
                         onClick = { viewModel.loginUser() },
                         modifier = Modifier
@@ -101,8 +106,7 @@ fun LoginScreen(
                             Text("Đăng nhập", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                         }
                     }
-                    
-                    // Xử lý lỗi
+
                     if (loginState is LoginViewModel.LoginState.Error) {
                         Text(
                             text = (loginState as LoginViewModel.LoginState.Error).message,

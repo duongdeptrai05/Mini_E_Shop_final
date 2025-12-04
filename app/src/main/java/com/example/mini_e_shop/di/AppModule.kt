@@ -1,6 +1,10 @@
 package com.example.mini_e_shop.di
 
 import android.app.Application
+import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -12,6 +16,7 @@ import com.example.mini_e_shop.data.local.dao.UserDao
 import com.example.mini_e_shop.data.local.database.AppDatabase
 import com.example.mini_e_shop.data.local.entity.UserEntity
 import com.example.mini_e_shop.data.local.entity.UserRole
+import com.example.mini_e_shop.data.preferences.UserPreferencesManager
 import com.example.mini_e_shop.data.repository.CartRepositoryImpl
 import com.example.mini_e_shop.data.repository.OrderRepositoryImpl
 import com.example.mini_e_shop.data.repository.ProductRepositoryImpl
@@ -24,57 +29,61 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import org.mindrot.jbcrypt.BCrypt
+import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
-// --- MODULE CUNG CẤP CÁC ĐỐI TƯỢNG CỤ THỂ (DATABASE, DAO) ---
+// Custom Callback class to break the circular dependency
+class DatabaseCallback @Inject constructor(
+    private val userDao: Provider<UserDao>,
+    private val productDao: Provider<ProductDao>,
+    // Inject application-level scope to ensure the seeding task is not dropped
+    private val applicationScope: CoroutineScope
+) : RoomDatabase.Callback() {
+    override fun onCreate(db: SupportSQLiteDatabase) {
+        super.onCreate(db)
+        // Use the injected scope to launch the coroutine
+        applicationScope.launch {
+            val adminPasswordHash = BCrypt.hashpw("admin123", BCrypt.gensalt())
+            val adminAccount = UserEntity(
+                email = "admin@eshop.com",
+                passwordHash = adminPasswordHash,
+                name = "Admin",
+                role = UserRole.ADMIN
+            )
+            userDao.get().insertUser(adminAccount)
+
+            productDao.get().insertProducts(SampleData.getSampleProducts())
+        }
+    }
+}
+
 @Module
 @InstallIn(SingletonComponent::class)
-object DatabaseModule { // Đổi tên thành DatabaseModule cho rõ ràng
-
+object DatabaseModule {
     @Provides
     @Singleton
     fun provideAppDatabase(
         app: Application,
-        dbProvider: Provider<AppDatabase>
+        callback: DatabaseCallback
     ): AppDatabase {
         return Room.databaseBuilder(
             app,
             AppDatabase::class.java,
             "mini_e_shop.db"
         )
-            .addCallback(object : RoomDatabase.Callback() {
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    super.onCreate(db)
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val userDao = dbProvider.get().userDao()
-                        val productDao = dbProvider.get().productDao()
-
-                        // Tạo tài khoản Admin
-                        val adminPasswordHash = BCrypt.hashpw("admin123", BCrypt.gensalt())
-                        val adminAccount = UserEntity(
-                            email = "admin@eshop.com",
-                            passwordHash = adminPasswordHash,
-                            name = "Admin",
-                            role = UserRole.ADMIN
-                        )
-                        userDao.insertUser(adminAccount)
-
-                        // Thêm sản phẩm mẫu
-                        productDao.insertProducts(SampleData.getSampleProducts())
-                    }
-                }
-            })
+            .addCallback(callback)
             .fallbackToDestructiveMigration()
             .build()
     }
 
-    // Cung cấp các DAO từ Database
     @Provides
     @Singleton
     fun provideUserDao(db: AppDatabase): UserDao = db.userDao()
@@ -92,12 +101,9 @@ object DatabaseModule { // Đổi tên thành DatabaseModule cho rõ ràng
     fun provideCartDao(db: AppDatabase): CartDao = db.cartDao()
 }
 
-// --- MODULE LIÊN KẾT (BINDING) INTERFACE VỚI CLASS TRIỂN KHAI ---
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class RepositoryModule {
-
-    // 1. SỬ DỤNG @Binds ĐỂ LIÊN KẾT
     @Binds
     @Singleton
     abstract fun bindUserRepository(
@@ -123,4 +129,24 @@ abstract class RepositoryModule {
     ): CartRepository
 }
 
-// Dòng code 'data class AppDatabaseDaos(...)' và các hàm provider cũ có thể được xóa bỏ
+@Module
+@InstallIn(SingletonComponent::class)
+object PreferencesModule {
+    @Provides
+    @Singleton
+    fun provideUserPreferencesManager(@ApplicationContext context: Context): UserPreferencesManager {
+        return UserPreferencesManager(context)
+    }
+}
+
+// Module to provide a Singleton CoroutineScope that lives as long as the application
+@Module
+@InstallIn(SingletonComponent::class)
+object CoroutineModule {
+    @Provides
+    @Singleton
+    fun provideApplicationScope(): CoroutineScope {
+        // SupervisorJob makes sure that if one child coroutine fails, the scope is not cancelled
+        return CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    }
+}
