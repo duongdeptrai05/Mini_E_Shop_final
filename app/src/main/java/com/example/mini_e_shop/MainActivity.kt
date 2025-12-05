@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.mini_e_shop.presentation.add_edit_product.AddEditProductScreen
 import com.example.mini_e_shop.presentation.login.LoginScreen
 import com.example.mini_e_shop.presentation.main.MainScreen
@@ -27,6 +29,7 @@ import com.example.mini_e_shop.ui.theme.Mini_E_ShopTheme
 import dagger.hilt.android.AndroidEntryPoint
 import com.example.mini_e_shop.presentation.auth.AuthViewModel
 import com.example.mini_e_shop.presentation.auth.AuthState
+import com.example.mini_e_shop.presentation.product_detail.ProductDetailScreen
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -68,6 +71,9 @@ class MainActivity : ComponentActivity() {
                                                 },
                                                 onNavigateToAddEditProduct = { productId ->
                                                     navController.navigate("${Screen.AddEditProduct.route}?productId=$productId")
+                                                },
+                                                onProductClick = { productId ->
+                                                    navController.navigate("${Screen.ProductDetail.route}/$productId")
                                                 }
                                             )
                                         }
@@ -77,10 +83,31 @@ class MainActivity : ComponentActivity() {
                                                 onBack = { navController.popBackStack() }
                                             )
                                         }
-                                        composable("${Screen.AddEditProduct.route}?productId={productId}") {
+
+                                        composable(
+                                            // 1. Giữ nguyên route với tham số tùy chọn
+                                            route = "${Screen.AddEditProduct.route}?productId={productId}",
+                                            // 2. Thêm khối 'arguments' để định nghĩa kiểu dữ liệu và giá trị mặc định
+                                            arguments = listOf(
+                                                navArgument("productId") {
+                                                    type = NavType.IntType // Kiểu dữ liệu là SỐ NGUYÊN
+                                                    defaultValue = -1      // Giá trị mặc định khi thêm mới
+                                                }
+                                            )
+                                        ) {
+                                            // Phần gọi màn hình này giữ nguyên
                                             AddEditProductScreen(
                                                 viewModel = hiltViewModel(),
                                                 onSave = { navController.popBackStack() },
+                                                onBack = { navController.popBackStack() }
+                                            )
+                                        }
+                                        // THÊM composable MỚI NÀY VÀO
+                                        composable(
+                                            route = "${Screen.ProductDetail.route}/{productId}",
+                                            arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                                        ) { backStackEntry ->
+                                            ProductDetailScreen(
                                                 onBack = { navController.popBackStack() }
                                             )
                                         }

@@ -10,6 +10,7 @@ import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.mini_e_shop.data.local.SampleData
 import com.example.mini_e_shop.data.local.dao.CartDao
+import com.example.mini_e_shop.data.local.dao.FavoriteDao
 import com.example.mini_e_shop.data.local.dao.OrderDao
 import com.example.mini_e_shop.data.local.dao.ProductDao
 import com.example.mini_e_shop.data.local.dao.UserDao
@@ -18,10 +19,12 @@ import com.example.mini_e_shop.data.local.entity.UserEntity
 import com.example.mini_e_shop.data.local.entity.UserRole
 import com.example.mini_e_shop.data.preferences.UserPreferencesManager
 import com.example.mini_e_shop.data.repository.CartRepositoryImpl
+import com.example.mini_e_shop.data.repository.FavoriteRepositoryImpl
 import com.example.mini_e_shop.data.repository.OrderRepositoryImpl
 import com.example.mini_e_shop.data.repository.ProductRepositoryImpl
 import com.example.mini_e_shop.data.repository.UserRepositoryImpl
 import com.example.mini_e_shop.domain.repository.CartRepository
+import com.example.mini_e_shop.domain.repository.FavoriteRepository
 import com.example.mini_e_shop.domain.repository.OrderRepository
 import com.example.mini_e_shop.domain.repository.ProductRepository
 import com.example.mini_e_shop.domain.repository.UserRepository
@@ -44,16 +47,15 @@ import javax.inject.Singleton
 class DatabaseCallback @Inject constructor(
     private val userDao: Provider<UserDao>,
     private val productDao: Provider<ProductDao>,
-    // Inject application-level scope to ensure the seeding task is not dropped
     private val applicationScope: CoroutineScope
 ) : RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) {
         super.onCreate(db)
         // Use the injected scope to launch the coroutine
         applicationScope.launch {
-            val adminPasswordHash = BCrypt.hashpw("admin123", BCrypt.gensalt())
+            val adminPasswordHash = BCrypt.hashpw("123", BCrypt.gensalt())
             val adminAccount = UserEntity(
-                email = "admin@eshop.com",
+                email = "admin",
                 passwordHash = adminPasswordHash,
                 name = "Admin",
                 role = UserRole.ADMIN
@@ -99,6 +101,10 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideCartDao(db: AppDatabase): CartDao = db.cartDao()
+
+    @Provides
+    @Singleton
+    fun provideFavoriteDao(db: AppDatabase): FavoriteDao = db.favoriteDao()
 }
 
 @Module
@@ -127,6 +133,12 @@ abstract class RepositoryModule {
     abstract fun bindCartRepository(
         cartRepositoryImpl: CartRepositoryImpl
     ): CartRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindFavoriteRepository(
+        favoriteRepositoryImpl: FavoriteRepositoryImpl
+    ): FavoriteRepository
 }
 
 @Module

@@ -20,7 +20,8 @@ fun MainNavGraph(
     currentUser: UserEntity?, // Receive the current user
     onNavigateToOrders: () -> Unit,
     onLogout: () -> Unit,
-    onNavigateToAddEditProduct: (Int?) -> Unit
+    onNavigateToAddEditProduct: (Int?) -> Unit,
+    onProductClick: (Int) -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -31,7 +32,8 @@ fun MainNavGraph(
             ProductListScreen(
                 viewModel = hiltViewModel(),
                 isAdmin = isAdmin,
-                onNavigateToAddEditProduct = onNavigateToAddEditProduct
+                onNavigateToAddEditProduct = onNavigateToAddEditProduct,
+                onProductClick = onProductClick
             )
         }
         composable(Screen.Favorites.route) {

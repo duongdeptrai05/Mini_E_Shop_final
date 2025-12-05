@@ -41,4 +41,5 @@ sealed class Screen(
     // Các màn hình khác
     object Orders : Screen(route = "orders")
     object AddEditProduct : Screen(route = "add_edit_product")
+    object ProductDetail : Screen("product_detail")
 }

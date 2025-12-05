@@ -29,7 +29,8 @@ import com.example.mini_e_shop.ui.theme.PrimaryBlue
 fun ProductListScreen(
     viewModel: ProductListViewModel,
     isAdmin: Boolean,
-    onNavigateToAddEditProduct: (Int?) -> Unit
+    onNavigateToAddEditProduct: (Int?) -> Unit,
+    onProductClick: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -37,7 +38,7 @@ fun ProductListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("ShopMini", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
+                title = { Text("Điện tử Văn Mạnh", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
                 actions = {
                     IconButton(onClick = { /* Navigate to cart */ }) {
                         Icon(Icons.Default.ShoppingCart, contentDescription = "Cart")
@@ -78,10 +79,10 @@ fun ProductListScreen(
                                 isAdmin = isAdmin,
                                 onEdit = { onNavigateToAddEditProduct(product.id) },
                                 onDelete = { viewModel.deleteProduct(product) },
-                                onClick = { /* TODO: Navigate to Product Detail Screen */ },
+                                onClick = { onProductClick(product.id) },
                                 onAddToCart = { viewModel.addToCart(product) },
                                 onToggleFavorite = { viewModel.toggleFavorite(product) },
-                                isFavorite = false // TODO: Get real favorite state from ViewModel
+                                isFavorite = state.favoriteStatusMap[product.id] ?: false
                             )
                         }
                     }

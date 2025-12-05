@@ -8,4 +8,5 @@ interface UserRepository {
     suspend fun getUserById(userId: Int): UserEntity?
     fun observeUserById(userId: Int): Flow<UserEntity?>
     suspend fun registerUser(user: UserEntity)
+     fun getCurrentUser(): Flow<UserEntity?>
 }

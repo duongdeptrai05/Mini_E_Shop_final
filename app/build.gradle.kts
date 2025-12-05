@@ -50,9 +50,9 @@ android {
 
 dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
-
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
     implementation("org.mindrot:jbcrypt:0.4")
+    // --- QUAY LẠI PHIÊN BẢN MỚI NHẤT CỦA ROOM ---
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
@@ -73,11 +73,12 @@ dependencies {
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
-    // THÊM CÁC THƯ VIỆN CỦA HILT
+
+    // --- QUAY LẠI PHIÊN BẢN MỚI NHẤT CỦA HILT ---
     implementation("com.google.dagger:hilt-android:2.51.1")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
 

@@ -13,6 +13,9 @@ import com.example.mini_e_shop.data.local.entity.OrderItemEntity
 import com.example.mini_e_shop.data.local.entity.ProductEntity
 import com.example.mini_e_shop.data.local.entity.UserEntity
 import com.example.mini_e_shop.data.local.Converters
+import com.example.mini_e_shop.data.local.entity.FavoriteEntity // Thêm import
+import com.example.mini_e_shop.data.local.dao.FavoriteDao // Thêm import
+
 
 @Database(
     entities = [
@@ -20,9 +23,10 @@ import com.example.mini_e_shop.data.local.Converters
         ProductEntity::class,
         CartItemEntity::class,
         OrderEntity::class,
-        OrderItemEntity::class
+        OrderItemEntity::class,
+        FavoriteEntity::class
     ],
-    version = 7, // Force database recreation
+    version = 8, // Force database recreation
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -31,4 +35,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun cartDao(): CartDao
     abstract fun orderDao(): OrderDao
     abstract fun userDao(): UserDao
+
+    abstract fun favoriteDao(): FavoriteDao
 }

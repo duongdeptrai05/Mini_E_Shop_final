@@ -18,7 +18,8 @@ fun MainScreen(
     mainUiState: MainUiState.Success,
     onNavigateToOrders: () -> Unit,
     onLogout: () -> Unit,
-    onNavigateToAddEditProduct: (Int?) -> Unit
+    onNavigateToAddEditProduct: (Int?) -> Unit,
+    onProductClick: (Int) -> Unit
 ) {
     val navController = rememberNavController()
 
@@ -35,7 +36,8 @@ fun MainScreen(
             currentUser = mainUiState.currentUser, // Pass the user object down
             onNavigateToOrders = onNavigateToOrders,
             onLogout = onLogout,
-            onNavigateToAddEditProduct = onNavigateToAddEditProduct
+            onNavigateToAddEditProduct = onNavigateToAddEditProduct,
+            onProductClick = onProductClick
         )
     }
 }
