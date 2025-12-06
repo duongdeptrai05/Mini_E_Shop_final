@@ -32,4 +32,8 @@ interface ProductDao {
 
     @Query("SELECT * FROM products WHERE id = :id LIMIT 1")
     suspend fun getProductById(id: Int): ProductEntity?
+
+    @Query("SELECT COUNT(*) FROM products")
+    suspend fun getProductCount(): Int
+
 }

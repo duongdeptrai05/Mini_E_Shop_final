@@ -2,6 +2,8 @@ package com.example.mini_e_shop.data.repository
 
 import com.example.mini_e_shop.data.local.dao.FavoriteDao
 import com.example.mini_e_shop.data.local.entity.FavoriteEntity
+import com.example.mini_e_shop.data.local.entity.ProductEntity
+import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.domain.repository.FavoriteRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -24,4 +26,24 @@ class FavoriteRepositoryImpl @Inject constructor(
             favoriteDao.addFavorite(FavoriteEntity(userId = userId, productId = productId))
         }
     }
+
+    // EDIT: Add the new function implementation here
+    override fun getFavoriteProducts(userId: Int): Flow<List<Product>> {
+        return favoriteDao.getFavoriteProducts(userId).map { favoriteProductEntities ->
+            favoriteProductEntities.map { it.toDomain() }
+        }
+    }
+}
+private fun ProductEntity.toDomain(): Product {
+    return Product(
+        id = this.id,
+        name = this.name,
+        brand = this.brand,
+        category = this.category,
+        origin = this.origin,
+        price = this.price,
+        stock = this.stock,
+        imageUrl = this.imageUrl,
+        description = this.description
+    )
 }

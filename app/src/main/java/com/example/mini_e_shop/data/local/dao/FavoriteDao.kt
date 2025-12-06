@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.example.mini_e_shop.data.local.entity.FavoriteEntity
+import com.example.mini_e_shop.data.local.entity.ProductEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -20,5 +21,11 @@ interface FavoriteDao {
 
     @Query("SELECT productId FROM favorites WHERE userId = :userId")
     fun getFavoriteProductIds(userId: Int): Flow<List<Int>>
+    @Query("""
+        SELECT p.* FROM products p
+        INNER JOIN favorites f ON p.id = f.productId
+        WHERE f.userId = :userId
+    """)
+    fun getFavoriteProducts(userId: Int): Flow<List<ProductEntity>>
 }
     

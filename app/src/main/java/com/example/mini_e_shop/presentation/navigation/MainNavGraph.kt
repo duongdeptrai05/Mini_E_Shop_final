@@ -8,24 +8,27 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.mini_e_shop.data.local.entity.UserEntity
 import com.example.mini_e_shop.presentation.cart.CartScreen
-import com.example.mini_e_shop.presentation.cart.CartViewModel
+import com.example.mini_e_shop.presentation.favorites.FavoritesScreen
 import com.example.mini_e_shop.presentation.products_list.ProductListScreen
 import com.example.mini_e_shop.presentation.profile.ProfileScreen
 
 @Composable
 fun MainNavGraph(
     modifier: Modifier = Modifier,
-    navController: NavHostController,
+    mainNavController: NavHostController, // NavController chính
+     // Để điều hướng ra các màn hình ngoài (Checkout, Detail...)
+    bottomNavController: NavHostController, // Để điều hướng giữa các tab
     isAdmin: Boolean,
-    currentUser: UserEntity?, // Receive the current user
+    currentUser: UserEntity?,
     onNavigateToOrders: () -> Unit,
     onLogout: () -> Unit,
     onNavigateToAddEditProduct: (Int?) -> Unit,
     onProductClick: (Int) -> Unit,
-    onNavigateToSupport: () -> Unit
+    onNavigateToSupport: () -> Unit,
+    onNavigateToCheckout: (String) -> Unit
 ) {
     NavHost(
-        navController = navController,
+        navController = bottomNavController, // NavHost này dùng NavController của bottom bar
         startDestination = Screen.Home.route,
         modifier = modifier
     ) {
@@ -39,14 +42,18 @@ fun MainNavGraph(
             )
         }
         composable(Screen.Favorites.route) {
-            // Favorites screen will be created here later
+            FavoritesScreen(
+                onProductClick = onProductClick,
+                onNavigateToAddEditProduct = onNavigateToAddEditProduct
+            )
         }
         composable(Screen.Cart.route) {
-            val cartViewModel = hiltViewModel<CartViewModel>()
-            CartScreen(viewModel = cartViewModel)
+            CartScreen(
+                viewModel = hiltViewModel(),
+                onNavigateToCheckout = onNavigateToCheckout // CartScreen dùng NavController chính để điều hướng ra ngoài
+            )
         }
         composable(Screen.Profile.route) {
-            // No longer needs UserViewModel, pass the user object directly
             ProfileScreen(
                 currentUser = currentUser,
                 onNavigateToOrders = onNavigateToOrders,

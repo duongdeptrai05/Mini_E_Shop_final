@@ -3,13 +3,11 @@ package com.example.mini_e_shop
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,19 +17,21 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.mini_e_shop.presentation.add_edit_product.AddEditProductScreen
+import com.example.mini_e_shop.presentation.auth.AuthState
+import com.example.mini_e_shop.presentation.auth.AuthViewModel
+import com.example.mini_e_shop.presentation.auth.MainUiState
+import com.example.mini_e_shop.presentation.checkout.CheckoutScreen
+import com.example.mini_e_shop.presentation.contact.ContactScreen
 import com.example.mini_e_shop.presentation.login.LoginScreen
 import com.example.mini_e_shop.presentation.main.MainScreen
-import com.example.mini_e_shop.presentation.auth.MainUiState // Corrected import path
 import com.example.mini_e_shop.presentation.navigation.Screen
 import com.example.mini_e_shop.presentation.orders.OrdersScreen
+import com.example.mini_e_shop.presentation.product_detail.ProductDetailScreen
 import com.example.mini_e_shop.presentation.register.RegisterScreen
+import com.example.mini_e_shop.presentation.support.SupportScreen
 import com.example.mini_e_shop.ui.theme.Mini_E_ShopTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.example.mini_e_shop.presentation.auth.AuthViewModel
-import com.example.mini_e_shop.presentation.auth.AuthState
-import com.example.mini_e_shop.presentation.contact.ContactScreen
-import com.example.mini_e_shop.presentation.product_detail.ProductDetailScreen
-import com.example.mini_e_shop.presentation.support.SupportScreen
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -40,112 +40,136 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             Mini_E_ShopTheme {
-                Surface(color = MaterialTheme.colorScheme.background) {
-                    val authViewModel = hiltViewModel<AuthViewModel>()
-                    val authState by authViewModel.authState.collectAsState()
-                    val navController = rememberNavController()
+                val authViewModel = hiltViewModel<AuthViewModel>()
+                val authState by authViewModel.authState.collectAsState()
+                val navController = rememberNavController() // CHỈ DÙNG MỘT NAVCONTROLLER DUY NHẤT
+                val snackbarHostState = remember { SnackbarHostState() }
+                val scope = rememberCoroutineScope()
 
-                    when (authState) {
-                        AuthState.Loading -> {
-                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                CircularProgressIndicator()
-                            }
-                        }
-                        AuthState.Authenticated -> {
-                            val mainUiState by authViewModel.mainUiState.collectAsState()
 
-                            when (mainUiState) {
-                                is MainUiState.Loading -> {
-                                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                                        CircularProgressIndicator()
-                                    }
-                                }
-                                is MainUiState.Success -> {
-                                    NavHost(navController = navController, startDestination = Screen.Main.route) {
-                                        composable(Screen.Main.route) {
-                                            MainScreen(
-                                                mainUiState = mainUiState as MainUiState.Success,
-                                                onNavigateToOrders = {
-                                                    navController.navigate(Screen.Orders.route)
-                                                },
-                                                onLogout = {
-                                                    authViewModel.onLogout()
-                                                },
-                                                onNavigateToAddEditProduct = { productId ->
-                                                    navController.navigate("${Screen.AddEditProduct.route}?productId=$productId")
-                                                },
-                                                onProductClick = { productId ->
-                                                    navController.navigate("${Screen.ProductDetail.route}/$productId")
-                                                },
-                                                onNavigateToSupport = {
-                                                    navController.navigate(Screen.Support.route)
-                                                }
-                                            )
-                                        }
-                                        composable(Screen.Orders.route) {
-                                            OrdersScreen(
-                                                viewModel = hiltViewModel(),
-                                                onBack = { navController.popBackStack() }
-                                            )
-                                        }
-
-                                        composable(
-                                            // 1. Giữ nguyên route với tham số tùy chọn
-                                            route = "${Screen.AddEditProduct.route}?productId={productId}",
-                                            // 2. Thêm khối 'arguments' để định nghĩa kiểu dữ liệu và giá trị mặc định
-                                            arguments = listOf(
-                                                navArgument("productId") {
-                                                    type = NavType.IntType // Kiểu dữ liệu là SỐ NGUYÊN
-                                                    defaultValue = -1      // Giá trị mặc định khi thêm mới
-                                                }
-                                            )
-                                        ) {
-                                            // Phần gọi màn hình này giữ nguyên
-                                            AddEditProductScreen(
-                                                viewModel = hiltViewModel(),
-                                                onSave = { navController.popBackStack() },
-                                                onBack = { navController.popBackStack() }
-                                            )
-                                        }
-                                        // THÊM composable MỚI NÀY VÀO
-                                        composable(
-                                            route = "${Screen.ProductDetail.route}/{productId}",
-                                            arguments = listOf(navArgument("productId") { type = NavType.IntType })
-                                        ) { backStackEntry ->
-                                            ProductDetailScreen(
-                                                onBack = { navController.popBackStack() }
-                                            )
-                                        }
-                                        composable(Screen.Support.route) {
-                                            SupportScreen(
-                                                onBack = { navController.popBackStack() },
-                                                onNavigateToContact = { navController.navigate(Screen.Contact.route) }
-                                            )
-                                        }
-                                        composable(Screen.Contact.route) {
-                                            ContactScreen(onBack = { navController.popBackStack() })
-                                        }
-                                    }
+                // SỬA: BỌC TẤT CẢ TRONG MỘT SCAFFOLD ĐỂ CUNG CẤP SNACKBARHOST
+                Scaffold(
+                    snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+                ) { padding -> // padding này là bắt buộc nhưng chúng ta không dùng
+                    Surface(
+                        modifier = Modifier.fillMaxSize().padding(padding),
+                        color = MaterialTheme.colorScheme.background
+                    ) {
+                        when (authState) {
+                            AuthState.Loading -> {
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator()
                                 }
                             }
-                        }
-                        AuthState.Unauthenticated -> {
-                            NavHost(navController = navController, startDestination = Screen.Login.route) {
-                                composable(Screen.Login.route) {
-                                    LoginScreen(
-                                        viewModel = hiltViewModel(),
-                                        onLoginSuccess = {
-                                            authViewModel.onLoginSuccess(it)
-                                        },
-                                        onNavigateToRegister = { navController.navigate(Screen.Register.route) }
-                                    )
+                            AuthState.Authenticated -> {
+                                val mainUiState by authViewModel.mainUiState.collectAsState()
+
+                                // Đổi tên biến để tránh nhầm lẫn với authState
+                                when (val currentState = mainUiState) {
+                                    is MainUiState.Loading -> {
+                                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                            CircularProgressIndicator()
+                                        }
+                                    }
+                                    is MainUiState.Success -> {
+                                        NavHost(navController = navController, startDestination = Screen.Main.route) {
+                                            composable(Screen.Main.route) {
+                                                MainScreen(
+                                                    mainUiState = currentState,
+                                                    // SỬA LỖI: Dùng thuộc tính đúng là 'currentUser'
+                                                    currentUser = currentState.currentUser,
+                                                    mainNavController = navController,
+                                                    onNavigateToOrders = { navController.navigate(Screen.Orders.route) },
+                                                    onLogout = { authViewModel.onLogout() },
+                                                    onNavigateToAddEditProduct = { productId ->
+                                                        navController.navigate("${Screen.AddEditProduct.route}?productId=$productId")
+                                                    },
+                                                    onProductClick = { productId ->
+                                                        navController.navigate("${Screen.ProductDetail.route}/$productId")
+                                                    },
+                                                    onNavigateToSupport = { navController.navigate(Screen.Support.route) },
+                                                    onNavigateToCheckout = { cartItemIds ->
+                                                        navController.navigate("${Screen.Checkout.route}/$cartItemIds")
+                                                    }
+
+                                                )
+                                            }
+                                            composable(Screen.Orders.route) {
+                                                OrdersScreen(
+                                                    viewModel = hiltViewModel(),
+                                                    onBack = { navController.popBackStack() }
+                                                )
+                                            }
+                                            composable(
+                                                route = "${Screen.AddEditProduct.route}?productId={productId}",
+                                                arguments = listOf(
+                                                    navArgument("productId") {
+                                                        type = NavType.IntType
+                                                        defaultValue = -1
+                                                    }
+                                                )
+                                            ) {
+                                                AddEditProductScreen(
+                                                    viewModel = hiltViewModel(),
+                                                    onSave = { navController.popBackStack() },
+                                                    onBack = { navController.popBackStack() }
+                                                )
+                                            }
+                                            composable(
+                                                route = "${Screen.ProductDetail.route}/{productId}",
+                                                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                                            ) {
+                                                ProductDetailScreen(
+                                                    onBack = { navController.popBackStack() }
+                                                )
+                                            }
+                                            composable(Screen.Support.route) {
+                                                SupportScreen(
+                                                    onBack = { navController.popBackStack() },
+                                                    onNavigateToContact = { navController.navigate(Screen.Contact.route) }
+                                                )
+                                            }
+                                            composable(Screen.Contact.route) {
+                                                ContactScreen(onBack = { navController.popBackStack() })
+                                            }
+                                            // SỬA: COMPOSABLE CHO CHECKOUT GIỜ ĐÃ HOÀN TOÀN HỢP LỆ
+                                            composable(
+                                                route = "${Screen.Checkout.route}/{cartItemIds}",
+                                                arguments = listOf(navArgument("cartItemIds") { type = NavType.StringType })
+                                            ) {
+                                                CheckoutScreen(
+                                                    // Không cần truyền cartViewModel nữa
+                                                    onNavigateBack = { navController.popBackStack() },
+                                                    onShowSnackbar = { message ->
+                                                        // Giờ đây scope và snackbarHostState đã tồn tại và hợp lệ
+                                                        scope.launch {
+                                                            snackbarHostState.showSnackbar(message)
+                                                        }
+                                                    }
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
-                                composable(Screen.Register.route) {
-                                    RegisterScreen(
-                                        viewModel = hiltViewModel(),
-                                        onRegisterSuccess = { navController.navigate(Screen.Login.route) { popUpTo(Screen.Register.route) { inclusive = true } } },
-                                        onBackToLogin = { navController.popBackStack() }
-                                    )
+                            }
+                            AuthState.Unauthenticated -> {
+                                NavHost(navController = navController, startDestination = Screen.Login.route) {
+                                    composable(Screen.Login.route) {
+                                        LoginScreen(
+                                            viewModel = hiltViewModel(),
+                                            onLoginSuccess = {
+                                                authViewModel.onLoginSuccess(it)
+                                            },
+                                            onNavigateToRegister = { navController.navigate(Screen.Register.route) }
+                                        )
+                                    }
+                                    composable(Screen.Register.route) {
+                                        RegisterScreen(
+                                            viewModel = hiltViewModel(),
+                                            onRegisterSuccess = { navController.navigate(Screen.Login.route) { popUpTo(Screen.Register.route) { inclusive = true } } },
+                                            onBackToLogin = { navController.popBackStack() }
+                                        )
+                                    }
                                 }
                             }
                         }

@@ -9,8 +9,12 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -82,7 +87,11 @@ fun RegisterScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp)
-                            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp), spotColor = PrimaryBlue),
+                            .shadow(
+                                elevation = 8.dp,
+                                shape = RoundedCornerShape(16.dp),
+                                spotColor = PrimaryBlue
+                            ),
                         colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
                         shape = RoundedCornerShape(16.dp)
                     ) {
@@ -98,7 +107,9 @@ fun RegisterScreen(
                             text = (registerState as RegisterState.Error).message,
                             color = MaterialTheme.colorScheme.error,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(top = 16.dp).fillMaxWidth()
+                            modifier = Modifier
+                                .padding(top = 16.dp)
+                                .fillMaxWidth()
                         )
                     }
                 }
@@ -215,6 +226,7 @@ private fun EmailField(value: String, onValueChange: (String) -> Unit) {
 
 @Composable
 private fun PasswordField(value: String, onValueChange: (String) -> Unit) {
+    var isPasswordVisible by remember { mutableStateOf(false) }
     Column {
         Text("Mật khẩu", fontSize = 12.sp, fontWeight = FontWeight.Medium, color = TextGray)
         Spacer(modifier = Modifier.height(4.dp))
@@ -224,13 +236,25 @@ private fun PasswordField(value: String, onValueChange: (String) -> Unit) {
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("••••••••") },
             leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password icon", tint = TextGray) },
+            trailingIcon = {
+                val image = if (isPasswordVisible)
+                // Icon mắt đóng khi mật khẩu đang hiển thị
+                    Icons.Filled.VisibilityOff
+                else
+                // Icon mắt mở khi mật khẩu đang bị ẩn
+                    Icons.Filled.Visibility
+
+                IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                    Icon(imageVector = image, contentDescription = "Toggle password visibility")
+                }
+            },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = PrimaryBlue,
                 unfocusedBorderColor = Color.LightGray,
                 cursorColor = PrimaryBlue
             ),
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
             singleLine = true
         )

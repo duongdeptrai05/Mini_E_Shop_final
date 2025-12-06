@@ -10,6 +10,10 @@ import androidx.room.Update
 import androidx.room.Upsert
 import com.example.mini_e_shop.data.local.entity.CartItemEntity
 import kotlinx.coroutines.flow.Flow
+import androidx.room.Embedded
+import androidx.room.Relation
+import com.example.mini_e_shop.data.local.entity.ProductEntity
+
 
 @Dao
 interface CartDao {
@@ -40,4 +44,6 @@ interface CartDao {
     suspend fun removeFromCart(cartItem: CartItemEntity)
     @Upsert
     suspend fun upsertCartItem(cartItem: CartItemEntity)
+    @Query("SELECT * FROM cart_items WHERE id IN (:cartItemIds)")
+    suspend fun getCartItemsByIds(cartItemIds: List<Int>): List<CartItemWithProduct>
 }

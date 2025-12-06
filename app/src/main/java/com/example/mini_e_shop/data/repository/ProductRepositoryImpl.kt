@@ -1,11 +1,16 @@
 package com.example.mini_e_shop.data.repository
 
+import androidx.activity.result.launch
+import com.example.mini_e_shop.data.local.SampleData
 import com.example.mini_e_shop.data.local.dao.ProductDao
 import com.example.mini_e_shop.data.local.entity.ProductEntity
 import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.domain.repository.ProductRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -13,6 +18,22 @@ import javax.inject.Singleton
 class ProductRepositoryImpl @Inject constructor(
     private val productDao: ProductDao
 ) : ProductRepository {
+
+    // BƯỚC 1: Thêm một khối init
+    init {
+        // Sử dụng CoroutineScope để chạy một tác vụ bất đồng bộ không chặn
+        // mà không cần đến viewModelScope (vì đây là Repository)
+        CoroutineScope(Dispatchers.IO).launch {
+            seedSampleProducts()
+        }
+    }
+
+    // BƯỚC 2: Tạo hàm kiểm tra và chèn dữ liệu
+    private suspend fun seedSampleProducts() {
+        if (productDao.getProductCount() == 0) {
+            productDao.insertProducts(SampleData.getSampleProducts())
+        }
+    }
 
     override fun getAllProducts(): Flow<List<Product>> {
         return productDao.getAllProducts().map { listOfEntities ->

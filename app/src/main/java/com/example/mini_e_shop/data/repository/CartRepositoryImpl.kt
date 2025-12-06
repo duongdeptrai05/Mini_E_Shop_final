@@ -1,8 +1,11 @@
 package com.example.mini_e_shop.data.repository
 
 import com.example.mini_e_shop.data.local.dao.CartDao
+import com.example.mini_e_shop.data.local.dao.CartItemWithProduct
 import com.example.mini_e_shop.data.local.entity.CartItemEntity
+import com.example.mini_e_shop.data.local.entity.ProductEntity
 import com.example.mini_e_shop.data.mapper.toCartItemDetails
+import com.example.mini_e_shop.domain.model.CartItem
 import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.domain.repository.CartRepository
 import com.example.mini_e_shop.presentation.cart.CartItemDetails
@@ -35,6 +38,11 @@ class CartRepositoryImpl @Inject constructor(
         )
         cartDao.upsertCartItem(cartItem)
     }
+    override suspend fun getCartItemsByIds(cartItemIds: List<Int>): List<CartItemDetails> {
+        return cartDao.getCartItemsByIds(cartItemIds).map{ cartItemWithProduct ->
+            cartItemWithProduct.toCartItemDetails()
+        }
+    }
     override suspend fun updateQuantity(cartItemId: Int, newQuantity: Int) {
         cartDao.updateQuantity(cartItemId, newQuantity)
     }
@@ -46,4 +54,35 @@ class CartRepositoryImpl @Inject constructor(
     override suspend fun clearCart(userId: Int) {
         cartDao.clearCart(userId)
     }
+}
+// --- BƯỚC 1: THÊM CÁC HÀM MAPPER VÀO CUỐI FILE ---
+
+private fun CartItemWithProduct.toCartItemDetails(): CartItemDetails {
+    return CartItemDetails(
+            cartItem = this.cartItem.toDomain(),
+    product = this.product.toDomain()
+    )
+}
+
+private fun CartItemEntity.toDomain(): CartItem {
+    return CartItem(
+        id = this.id,
+        userId = this.userId,
+        productId = this.productId,
+        quantity = this.quantity
+    )
+}
+
+private fun ProductEntity.toDomain(): Product {
+    return Product(
+        id = this.id,
+        name = this.name,
+        brand = this.brand,
+        category = this.category,
+        origin = this.origin,
+        price = this.price,
+        stock = this.stock,
+        imageUrl = this.imageUrl,
+        description = this.description
+    )
 }

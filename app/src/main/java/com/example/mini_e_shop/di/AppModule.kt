@@ -53,6 +53,7 @@ class DatabaseCallback @Inject constructor(
         super.onCreate(db)
         // Use the injected scope to launch the coroutine
         applicationScope.launch {
+
             val adminPasswordHash = BCrypt.hashpw("123", BCrypt.gensalt())
             val adminAccount = UserEntity(
                 email = "admin",
@@ -62,103 +63,124 @@ class DatabaseCallback @Inject constructor(
             )
             userDao.get().insertUser(adminAccount)
 
-            productDao.get().insertProducts(SampleData.getSampleProducts())
         }
     }
-}
 
-@Module
-@InstallIn(SingletonComponent::class)
-object DatabaseModule {
-    @Provides
-    @Singleton
-    fun provideAppDatabase(
-        app: Application,
-        callback: DatabaseCallback
-    ): AppDatabase {
-        return Room.databaseBuilder(
-            app,
-            AppDatabase::class.java,
-            "mini_e_shop.db"
-        )
-            .addCallback(callback)
-            .fallbackToDestructiveMigration()
-            .build()
+//    private suspend fun createAdminAccount() {
+//        val adminPasswordHash = BCrypt.hashpw("123", BCrypt.gensalt())
+//        val adminAccount = UserEntity(
+//            email = "admin",
+//            passwordHash = adminPasswordHash,
+//            name = "Admin",
+//            role = UserRole.ADMIN
+//        )
+//        userDao.get().insertUser(adminAccount)
+//    }
+
+//    suspend fun seedSampleProducts() {
+//        // Lấy productDao từ Provider
+//        val dao = productDao.get()
+//        // Kiểm tra xem có sản phẩm nào trong bảng chưa
+//        if (dao.getProductCount() == 0) {
+//            // Nếu chưa có, mới chèn dữ liệu mẫu
+//            dao.insertProducts(SampleData.getSampleProducts())
+//        }
+//    }
+
+
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object DatabaseModule {
+        @Provides
+        @Singleton
+        fun provideAppDatabase(
+            app: Application,
+            callback: DatabaseCallback
+        ): AppDatabase {
+            return Room.databaseBuilder(
+                app,
+                AppDatabase::class.java,
+                "mini_e_shop.db"
+            )
+                .addCallback(callback)
+                .fallbackToDestructiveMigration()
+                .build()
+        }
+
+        @Provides
+        @Singleton
+        fun provideUserDao(db: AppDatabase): UserDao = db.userDao()
+
+        @Provides
+        @Singleton
+        fun provideProductDao(db: AppDatabase): ProductDao = db.productDao()
+
+        @Provides
+        @Singleton
+        fun provideOrderDao(db: AppDatabase): OrderDao = db.orderDao()
+
+        @Provides
+        @Singleton
+        fun provideCartDao(db: AppDatabase): CartDao = db.cartDao()
+
+        @Provides
+        @Singleton
+        fun provideFavoriteDao(db: AppDatabase): FavoriteDao = db.favoriteDao()
     }
 
-    @Provides
-    @Singleton
-    fun provideUserDao(db: AppDatabase): UserDao = db.userDao()
+    @Module
+    @InstallIn(SingletonComponent::class)
+    abstract class RepositoryModule {
+        @Binds
+        @Singleton
+        abstract fun bindUserRepository(
+            userRepositoryImpl: UserRepositoryImpl
+        ): UserRepository
 
-    @Provides
-    @Singleton
-    fun provideProductDao(db: AppDatabase): ProductDao = db.productDao()
+        @Binds
+        @Singleton
+        abstract fun bindProductRepository(
+            productRepositoryImpl: ProductRepositoryImpl
+        ): ProductRepository
 
-    @Provides
-    @Singleton
-    fun provideOrderDao(db: AppDatabase): OrderDao = db.orderDao()
+        @Binds
+        @Singleton
+        abstract fun bindOrderRepository(
+            orderRepositoryImpl: OrderRepositoryImpl
+        ): OrderRepository
 
-    @Provides
-    @Singleton
-    fun provideCartDao(db: AppDatabase): CartDao = db.cartDao()
+        @Binds
+        @Singleton
+        abstract fun bindCartRepository(
+            cartRepositoryImpl: CartRepositoryImpl
+        ): CartRepository
 
-    @Provides
-    @Singleton
-    fun provideFavoriteDao(db: AppDatabase): FavoriteDao = db.favoriteDao()
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class RepositoryModule {
-    @Binds
-    @Singleton
-    abstract fun bindUserRepository(
-        userRepositoryImpl: UserRepositoryImpl
-    ): UserRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindProductRepository(
-        productRepositoryImpl: ProductRepositoryImpl
-    ): ProductRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindOrderRepository(
-        orderRepositoryImpl: OrderRepositoryImpl
-    ): OrderRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindCartRepository(
-        cartRepositoryImpl: CartRepositoryImpl
-    ): CartRepository
-
-    @Binds
-    @Singleton
-    abstract fun bindFavoriteRepository(
-        favoriteRepositoryImpl: FavoriteRepositoryImpl
-    ): FavoriteRepository
-}
-
-@Module
-@InstallIn(SingletonComponent::class)
-object PreferencesModule {
-    @Provides
-    @Singleton
-    fun provideUserPreferencesManager(@ApplicationContext context: Context): UserPreferencesManager {
-        return UserPreferencesManager(context)
+        @Binds
+        @Singleton
+        abstract fun bindFavoriteRepository(
+            favoriteRepositoryImpl: FavoriteRepositoryImpl
+        ): FavoriteRepository
     }
-}
 
-// Module to provide a Singleton CoroutineScope that lives as long as the application
-@Module
-@InstallIn(SingletonComponent::class)
-object CoroutineModule {
-    @Provides
-    @Singleton
-    fun provideApplicationScope(): CoroutineScope {
-        // SupervisorJob makes sure that if one child coroutine fails, the scope is not cancelled
-        return CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object PreferencesModule {
+        @Provides
+        @Singleton
+        fun provideUserPreferencesManager(@ApplicationContext context: Context): UserPreferencesManager {
+            return UserPreferencesManager(context)
+        }
+    }
+
+    // Module to provide a Singleton CoroutineScope that lives as long as the application
+    @Module
+    @InstallIn(SingletonComponent::class)
+    object CoroutineModule {
+        @Provides
+        @Singleton
+        fun provideApplicationScope(): CoroutineScope {
+            // SupervisorJob makes sure that if one child coroutine fails, the scope is not cancelled
+            return CoroutineScope(SupervisorJob() + Dispatchers.IO)
+        }
     }
 }
