@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.mini_e_shop.domain.model.Product
-import com.example.mini_e_shop.ui.theme.PrimaryBlue
+import com.example.mini_e_shop.ui.theme.*
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -67,22 +67,50 @@ fun ProductListScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             TopAppBar(
-                title = { Text("Điện tử Văn Mạnh", fontWeight = FontWeight.Bold, fontSize = 22.sp) },
+                title = { 
+                    Text(
+                        "Điện tử Văn Mạnh", 
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
                 actions = {
-                    IconButton(onClick = onNavigateToSupport) {
-                        Icon(Icons.Default.ContactSupport, contentDescription = "Customer Support")
+                    Box(
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(HomeColor.copy(alpha = 0.1f))
+                            .clickable(onClick = onNavigateToSupport)
+                            .padding(8.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.ContactSupport, 
+                            contentDescription = "Customer Support",
+                            tint = HomeColor,
+                            modifier = Modifier.size(22.dp)
+                        )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = HomeColor.copy(alpha = 0.05f),
+                    titleContentColor = HomeColor,
+                    actionIconContentColor = HomeColor
+                ),
+//                elevation = TopAppBarDefaults.topAppBarElevation(defaultElevation = 0.dp)
             )
         },
         floatingActionButton = {
             if (isAdmin) {
-                FloatingActionButton(onClick = { onNavigateToAddEditProduct(null) }) {
+                FloatingActionButton(
+                    onClick = { onNavigateToAddEditProduct(null) },
+                    containerColor = PrimaryIndigo,
+                    contentColor = Color.White
+                ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Product")
                 }
             }
-        }
+        },
+        containerColor = BackgroundLight
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             SearchBar(
@@ -137,7 +165,7 @@ fun ProductListScreen(
         }
     }
 }
-// Composable mới cho thanh lọc category
+// Composable mới cho thanh lọc category - Improved design
 @Composable
 private fun CategoryTabs(
     categories: List<String>,
@@ -145,25 +173,32 @@ private fun CategoryTabs(
     onCategorySelected: (String) -> Unit
 ) {
     LazyRow(
-        modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(BackgroundCard),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(categories) { category ->
             val isSelected = category == selectedCategory
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(50))
-                    .background(if (isSelected) PrimaryBlue else Color.LightGray.copy(alpha = 0.5f))
-                    .clickable { onCategorySelected(category) }
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = category,
-                    color = if (isSelected) Color.White else Color.Black,
-                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
-                )
-            }
+            FilterChip(
+                selected = isSelected,
+                onClick = { onCategorySelected(category) },
+                label = {
+                    Text(
+                        text = category,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                    )
+                },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = PrimaryIndigo,
+                    selectedLabelColor = Color.White,
+                    containerColor = SurfaceLight,
+                    labelColor = TextSecondary
+                ),
+                shape = RoundedCornerShape(20.dp)
+            )
         }
     }
 }
@@ -204,6 +239,7 @@ private fun SortOptions(
                 } else {
                     null
                 }
+
             )
         }
     }
@@ -214,14 +250,31 @@ private fun SearchBar(value: String, onValueChange: (String) -> Unit) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        placeholder = { Text("Tìm kiếm sản phẩm...") },
-        leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search Icon") },
-        shape = RoundedCornerShape(50),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        placeholder = { 
+            Text(
+                "Tìm kiếm sản phẩm...",
+                color = TextLight
+            ) 
+        },
+        leadingIcon = { 
+            Icon(
+                Icons.Default.Search, 
+                contentDescription = "Search Icon",
+                tint = TextSecondary
+            ) 
+        },
+        shape = RoundedCornerShape(16.dp),
         colors = OutlinedTextFieldDefaults.colors(
-            unfocusedBorderColor = Color.LightGray,
-            focusedBorderColor = PrimaryBlue
-        )
+            unfocusedBorderColor = BorderLight,
+            focusedBorderColor = PrimaryIndigo,
+            unfocusedContainerColor = BackgroundCard,
+            focusedContainerColor = BackgroundCard,
+            cursorColor = PrimaryIndigo
+        ),
+        singleLine = true
     )
 }
 
@@ -237,18 +290,31 @@ fun ProductCard(
     onToggleFavorite: () -> Unit,
     isFavorite: Boolean
 ) {
-    // Thêm dòng này: Kiểm tra xem sản phẩm có hết hàng không
     val isOutOfStock = product.stock == 0
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(4.dp),
-        // Sửa dòng này: Nếu hết hàng thì không cho phép nhấn vào Card
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(280.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp,
+            hoveredElevation = 4.dp
+        ),
+        colors = CardDefaults.cardColors(containerColor = BackgroundCard),
         onClick = { if (!isOutOfStock) onClick() }
     ) {
-        Column {
-            Box(contentAlignment = Alignment.Center) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            // Image section with overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(160.dp),
+                contentAlignment = Alignment.TopEnd
+            ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(product.imageUrl)
@@ -256,89 +322,163 @@ fun ProductCard(
                         .build(),
                     contentDescription = product.name,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(140.dp),
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
                     contentScale = ContentScale.Crop
                 )
-                // Thêm phần này: Nếu hết hàng, hiển thị một lớp nền mờ và chữ "Hết hàng"
-                if (isOutOfStock) {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .background(Color.Black.copy(alpha = 0.5f))
-                    )
-                    Text(
-                        text = "Hết hàng",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
-            }
-            Column(modifier = Modifier.padding(12.dp)) {
-                Text(product.name, fontWeight = FontWeight.Bold, maxLines = 1, fontSize = 14.sp)
-                Text(product.brand, color = Color.Gray, fontSize = 12.sp)
-
-                // Sửa phần này: Tạo một Row để chứa Giá và Tồn kho
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                
+                // Favorite/Admin buttons overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    contentAlignment = Alignment.TopEnd
                 ) {
-                    // Giá sản phẩm
-                    Text(
-                        text = "$${product.price}",
-                        fontWeight = FontWeight.Bold,
-                        color = PrimaryBlue,
-                        fontSize = 16.sp
-                    )
-                    // Thêm Spacer này để đẩy số lượng tồn kho sang bên phải
-                    Spacer(modifier = Modifier.weight(1f))
-                    // Thêm Text này để hiển thị số lượng tồn kho
-                    Text(
-                        text = "Kho: ${product.stock}",
-                        color = if (isOutOfStock) Color.Red else Color.Gray,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-
-            Box(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                contentAlignment = Alignment.BottomEnd
-            ) {
-                if (isAdmin) {
-                    Row {
-                        IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
-                            Icon(Icons.Default.Edit, contentDescription = "Edit", tint = Color.Gray, modifier = Modifier.size(20.dp))
+                    if (isAdmin) {
+                        Row(
+                            modifier = Modifier
+                                .background(
+                                    Color.White.copy(alpha = 0.9f),
+                                    RoundedCornerShape(8.dp)
+                                )
+                                .padding(4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            IconButton(
+                                onClick = onEdit,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Edit,
+                                    contentDescription = "Edit",
+                                    tint = PrimaryIndigo,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
+                            IconButton(
+                                onClick = onDelete,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = ErrorRed,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            }
                         }
-                        IconButton(onClick = onDelete, modifier = Modifier.size(36.dp)) {
-                            Icon(Icons.Default.Delete, contentDescription = "Delete", tint = Color.Red, modifier = Modifier.size(20.dp))
-                        }
-                    }
-                } else {
-                    Row {
-                        IconButton(onClick = onToggleFavorite, modifier = Modifier.size(36.dp)) {
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(RoundedCornerShape(22.dp))
+                                .background(
+                                    if (isFavorite) FavoritesColor.copy(alpha = 0.2f) 
+                                    else Color.White.copy(alpha = 0.95f)
+                                )
+                                .clickable(onClick = onToggleFavorite),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Icon(
                                 imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                                 contentDescription = "Favorite",
-                                tint = if (isFavorite) Color.Red else Color.Gray,
-                                modifier = Modifier.size(20.dp)
+                                tint = if (isFavorite) FavoritesColor else TextSecondary,
+                                modifier = Modifier.size(22.dp)
                             )
                         }
-                        IconButton(
-                            onClick = onAddToCart,
-                            modifier = Modifier.size(36.dp),
-                            enabled = !isOutOfStock // Thêm thuộc tính enabled
+                    }
+                }
+                
+                // Out of stock overlay
+                if (isOutOfStock) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.6f))
+                            .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Card(
+                            colors = CardDefaults.cardColors(containerColor = ErrorRed),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(
+                                text = "Hết hàng",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+                }
+            }
+            
+            // Content section
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+                    .weight(1f),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = product.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        color = TextPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = product.brand,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = TextSecondary,
+                        maxLines = 1
+                    )
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "$${String.format("%.2f", product.price)}",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryIndigo
+                    )
+                    if (!isAdmin) {
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (isOutOfStock) SurfaceLight 
+                                    else CartColor.copy(alpha = 0.15f)
+                                )
+                                .clickable(
+                                    enabled = !isOutOfStock,
+                                    onClick = onAddToCart
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 Icons.Outlined.AddShoppingCart,
                                 contentDescription = "Add to Cart",
-                                // Đổi màu icon nếu bị vô hiệu hóa
-                                tint = if (isOutOfStock) Color.LightGray else Color.Gray,
+                                tint = if (isOutOfStock) TextLight else CartColor,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
+                    } else {
+                        Text(
+                            text = "Kho: ${product.stock}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isOutOfStock) ErrorRed else TextSecondary,
+                            fontWeight = FontWeight.Medium
+                        )
                     }
                 }
             }

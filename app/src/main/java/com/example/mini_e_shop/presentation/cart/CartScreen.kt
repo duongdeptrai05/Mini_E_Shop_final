@@ -26,7 +26,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.mini_e_shop.domain.model.CartItem
 import com.example.mini_e_shop.domain.model.Product
-import com.example.mini_e_shop.ui.theme.PrimaryBlue
+import com.example.mini_e_shop.ui.theme.*
 import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -62,8 +62,18 @@ fun CartScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Giỏ hàng của bạn", fontWeight = FontWeight.Bold) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                title = { 
+                    Text(
+                        "Giỏ hàng của bạn",
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = CartColor.copy(alpha = 0.05f),
+                    titleContentColor = CartColor
+                ),
+//                elevation = TopAppBarDefaults.topAppBarElevation(defaultElevation = 0.dp)
             )
         },
         // SỬA: BottomBar giờ đây phức tạp hơn
@@ -87,7 +97,7 @@ fun CartScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(Color(0xFFF3F4F6))
+                .background(BackgroundLight)
         ) {
             when (val currentState = state) {
                 is CartUiState.Loading -> {
@@ -130,9 +140,12 @@ fun CartItemRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(2.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp,
+            pressedElevation = 4.dp
+        )
     ) {
         Row(
             modifier = Modifier.padding(12.dp),
@@ -154,8 +167,19 @@ fun CartItemRow(
             )
             Spacer(Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(item.product.name, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text("$${item.product.price}", color = PrimaryBlue, fontWeight = FontWeight.SemiBold)
+                Text(
+                    item.product.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = TextPrimary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    "$${String.format("%.2f", item.product.price)}",
+                    style = MaterialTheme.typography.titleSmall,
+                    color = PrimaryIndigo,
+                    fontWeight = FontWeight.SemiBold
+                )
             }
             Spacer(Modifier.width(16.dp))
             QuantitySelector(
@@ -192,9 +216,9 @@ private fun CheckoutBar(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(topStart = 0.dp, topEnd = 0.dp), // Để thanh bar phẳng
-        elevation = CardDefaults.cardElevation(8.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = BackgroundCard)
     ) {
         Column {
             Row(
@@ -212,30 +236,49 @@ private fun CheckoutBar(
                     Text("Tất cả")
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("Tổng thanh toán", color = Color.Gray, fontSize = 14.sp)
+                    Text(
+                        "Tổng thanh toán",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         "$${String.format("%.2f", checkoutPrice)}",
-                        fontWeight = FontWeight.ExtraBold,
-                        fontSize = 20.sp,
-                        color = PrimaryBlue
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = PrimaryIndigo
                     )
                 }
             }
             Button(
                 onClick = onCheckout,
-                enabled = isCheckoutEnabled, // Bật/tắt nút dựa trên trạng thái
-                shape = RoundedCornerShape(0.dp), // Nút hình chữ nhật
+                enabled = isCheckoutEnabled,
+                shape = RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryBlue,
-                    disabledContainerColor = Color.LightGray
+                    containerColor = PrimaryIndigo,
+                    disabledContainerColor = SurfaceLight,
+                    contentColor = Color.White,
+                    disabledContentColor = TextLight
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(56.dp),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 0.dp,
+                    disabledElevation = 0.dp
+                )
             ) {
-                Icon(Icons.Default.ShoppingCartCheckout, contentDescription = "Checkout")
+                Icon(
+                    Icons.Default.ShoppingCartCheckout,
+                    contentDescription = "Checkout",
+                    modifier = Modifier.size(20.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Mua hàng ($selectedItemsCount)", fontWeight = FontWeight.Bold)
+                Text(
+                    "Mua hàng ($selectedItemsCount)",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

@@ -28,11 +28,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.mini_e_shop.ui.theme.GradientEnd
-import com.example.mini_e_shop.ui.theme.GradientStart
-import com.example.mini_e_shop.ui.theme.LightGray
-import com.example.mini_e_shop.ui.theme.PrimaryBlue
-import com.example.mini_e_shop.ui.theme.TextGray
+import com.example.mini_e_shop.ui.theme.*
 
 @Composable
 fun RegisterScreen(
@@ -66,8 +62,8 @@ fun RegisterScreen(
                     .padding(top = 2.dp)
                     .offset(y = (-40).dp),
                 shape = RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(0.dp)
+                colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+                elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Column(
                     modifier = Modifier.padding(24.dp)
@@ -86,19 +82,29 @@ fun RegisterScreen(
                         onClick = { viewModel.registerUser() },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(50.dp)
-                            .shadow(
-                                elevation = 8.dp,
-                                shape = RoundedCornerShape(16.dp),
-                                spotColor = PrimaryBlue
-                            ),
-                        colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue),
-                        shape = RoundedCornerShape(16.dp)
+                            .height(56.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = PrimaryIndigo,
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 4.dp,
+                            pressedElevation = 2.dp
+                        )
                     ) {
                         if (registerState is RegisterState.Loading) {
-                            CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp)
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(20.dp)
+                            )
                         } else {
-                            Text("Đăng ký", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                            Text(
+                                "Đăng ký",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
 
@@ -138,12 +144,26 @@ private fun HeaderView() {
                     .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(Icons.Default.ShoppingBag, contentDescription = "Logo", tint = PrimaryBlue, modifier = Modifier.size(40.dp))
+                Icon(
+                    Icons.Default.ShoppingBag,
+                    contentDescription = "Logo",
+                    tint = PrimaryIndigo,
+                    modifier = Modifier.size(48.dp)
+                )
             }
             Spacer(modifier = Modifier.height(12.dp))
-            Text("Điện tử Văn Mạnh", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text("Tạo tài khoản mới", color = Color.White.copy(alpha = 0.9f), fontSize = 14.sp)
+            Text(
+                "Điện tử Văn Mạnh",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                "Tạo tài khoản mới",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.9f)
+            )
         }
     }
 }
@@ -154,7 +174,7 @@ private fun AuthTabs(onLoginClicked: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .background(LightGray)
+            .background(SurfaceLight)
             .padding(4.dp)
     ) {
         TextButton(
@@ -167,13 +187,17 @@ private fun AuthTabs(onLoginClicked: () -> Unit) {
         }
         Button(
             onClick = { /* Đang ở tab Đăng ký */ },
-            modifier = Modifier
-                .weight(1f)
-                .shadow(elevation = 4.dp, shape = RoundedCornerShape(10.dp)),
-            shape = RoundedCornerShape(10.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = PrimaryBlue)
+            modifier = Modifier.weight(1f),
+            shape = RoundedCornerShape(12.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = PrimaryIndigo),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
         ) {
-            Text("Đăng ký", fontWeight = FontWeight.SemiBold, color = Color.White)
+            Text(
+                "Đăng ký",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White
+            )
         }
     }
 }
@@ -191,9 +215,11 @@ private fun NameField(value: String, onValueChange: (String) -> Unit) {
             leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Name icon", tint = TextGray) },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryBlue,
-                unfocusedBorderColor = Color.LightGray,
-                cursorColor = PrimaryBlue
+                focusedBorderColor = PrimaryIndigo,
+                unfocusedBorderColor = BorderLight,
+                cursorColor = PrimaryIndigo,
+                focusedContainerColor = BackgroundCard,
+                unfocusedContainerColor = BackgroundCard
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             singleLine = true
@@ -214,9 +240,11 @@ private fun EmailField(value: String, onValueChange: (String) -> Unit) {
             leadingIcon = { Icon(Icons.Default.Email, contentDescription = "Email icon", tint = TextGray) },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryBlue,
-                unfocusedBorderColor = Color.LightGray,
-                cursorColor = PrimaryBlue
+                focusedBorderColor = PrimaryIndigo,
+                unfocusedBorderColor = BorderLight,
+                cursorColor = PrimaryIndigo,
+                focusedContainerColor = BackgroundCard,
+                unfocusedContainerColor = BackgroundCard
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
             singleLine = true
@@ -250,9 +278,11 @@ private fun PasswordField(value: String, onValueChange: (String) -> Unit) {
             },
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = PrimaryBlue,
-                unfocusedBorderColor = Color.LightGray,
-                cursorColor = PrimaryBlue
+                focusedBorderColor = PrimaryIndigo,
+                unfocusedBorderColor = BorderLight,
+                cursorColor = PrimaryIndigo,
+                focusedContainerColor = BackgroundCard,
+                unfocusedContainerColor = BackgroundCard
             ),
             visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
