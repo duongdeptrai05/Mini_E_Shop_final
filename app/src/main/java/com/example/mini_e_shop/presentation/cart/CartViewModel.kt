@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.domain.repository.CartRepository
 import com.example.mini_e_shop.domain.repository.OrderRepository
+import com.example.mini_e_shop.domain.repository.ProductRepository
 import com.example.mini_e_shop.domain.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -38,7 +39,8 @@ sealed class CartViewEvent {
 class CartViewModel @Inject constructor(
     private val cartRepository: CartRepository,
     private val orderRepository: OrderRepository,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val productRepository: ProductRepository
 ) : ViewModel() {
     private val _cartItems = MutableStateFlow<List<SelectableCartItem>>(emptyList())
     private val _eventChannel = Channel<CartViewEvent>()
@@ -114,6 +116,15 @@ class CartViewModel @Inject constructor(
 
     fun onQuantityChange(cartItemId: Int, newQuantity: Int) {
         viewModelScope.launch {
+            val item = _cartItems.value.find { it.details.cartItem.id == cartItemId }
+            if (item != null) {
+                val product = item.details.product
+                if (newQuantity > product.stock) {
+                    _eventChannel.send(CartViewEvent.ShowSnackbar("Số lượng vượt quá số hàng còn lại trong kho"))
+                    return@launch
+                }
+            }
+
             if (newQuantity > 0) {
                 cartRepository.updateQuantity(cartItemId, newQuantity)
             } else {
@@ -132,6 +143,9 @@ class CartViewModel @Inject constructor(
                 // Thay vì xóa toàn bộ giỏ hàng, chỉ xóa những item đã đặt
                 itemsToCheckout.forEach {
                     cartRepository.removeItem(it.cartItem.id)
+                    val product = it.product
+                    val newStock = product.stock - it.cartItem.quantity
+                    productRepository.updateProductStock(product.id, newStock)
                 }
             }
         }

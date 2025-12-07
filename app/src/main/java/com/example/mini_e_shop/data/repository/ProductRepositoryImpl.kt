@@ -54,6 +54,10 @@ class ProductRepositoryImpl @Inject constructor(
     override suspend fun deleteProduct(product: Product) {
         productDao.deleteProduct(product.toEntity())
     }
+
+    override suspend fun updateProductStock(productId: Int, newStock: Int) {
+        productDao.updateStock(productId, newStock)
+    }
 }
 
 // --- Các hàm Mapper (Chuyển đổi) ---

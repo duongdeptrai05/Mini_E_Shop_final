@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mini_e_shop.domain.repository.CartRepository
 import com.example.mini_e_shop.domain.repository.OrderRepository
+import com.example.mini_e_shop.domain.repository.ProductRepository
 import com.example.mini_e_shop.domain.repository.UserRepository
 import com.example.mini_e_shop.presentation.cart.CartItemDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,6 +38,7 @@ class CheckoutViewModel @Inject constructor(
     private val cartRepository: CartRepository,
     private val orderRepository: OrderRepository,
     private val userRepository: UserRepository,
+    private val productRepository: ProductRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -81,11 +83,24 @@ class CheckoutViewModel @Inject constructor(
             val currentState = uiState.value
             if (currentState is CheckoutUiState.Success) {
                 val currentUserId = userRepository.getCurrentUser().firstOrNull()?.id ?: return@launch
+
+                // Check stock before placing order
+                for (item in currentState.items) {
+                    val product = productRepository.getProductById(item.product.id)
+                    if (product == null || product.stock < item.cartItem.quantity) {
+                        _eventChannel.send(CheckoutEvent.ShowSnackbar("Sản phẩm '${item.product.name}' không đủ hàng trong kho."))
+                        return@launch
+                    }
+                }
+
                 if (currentState.items.isNotEmpty()) {
                     orderRepository.createOrderFromCart(currentUserId, currentState.items)
-                    // Remove the ordered items from the cart
+                    // Remove the ordered items from the cart and update stock
                     currentState.items.forEach {
                         cartRepository.removeItem(it.cartItem.id)
+                        val product = it.product
+                        val newStock = product.stock - it.cartItem.quantity
+                        productRepository.updateProductStock(product.id, newStock)
                     }
                     _eventChannel.send(CheckoutEvent.ShowSnackbar("Order placed successfully!"))
                     _eventChannel.send(CheckoutEvent.NavigateBack)

@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ReceiptLong
 import androidx.compose.material.icons.filled.Settings
@@ -108,7 +107,6 @@ private fun Header(user: UserEntity?) {
 private fun Menu(onNavigateToOrders: () -> Unit) {
     Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         MenuButton(text = "Đơn hàng của tôi", icon = Icons.Default.ReceiptLong, onClick = onNavigateToOrders)
-        MenuButton(text = "Sản phẩm yêu thích", icon = Icons.Default.Favorite, onClick = { /* Navigate to favorites */ })
         MenuButton(text = "Cài đặt", icon = Icons.Default.Settings, onClick = { /* Navigate to settings */ })
     }
 }

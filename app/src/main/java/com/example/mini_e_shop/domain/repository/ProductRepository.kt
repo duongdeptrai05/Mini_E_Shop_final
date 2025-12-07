@@ -29,4 +29,9 @@ interface ProductRepository {
      * Xóa một sản phẩm.
      */
     suspend fun deleteProduct(product: Product)
+
+    /**
+     * Cập nhật số lượng tồn kho của sản phẩm.
+     */
+    suspend fun updateProductStock(productId: Int, newStock: Int)
 }

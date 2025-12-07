@@ -112,9 +112,14 @@ class ProductListViewModel @Inject constructor(
         viewModelScope.launch {
             userRepository.getCurrentUser().firstOrNull()?.let { user ->
                 try {
-                    cartRepository.addProductToCart(product, user.id)
-                    // Gửi thông báo thành công qua Channel
-                    _eventChannel.send("Đã thêm '${product.name}' vào giỏ hàng")
+                    // Check if the product is in stock
+                    if (product.stock > 0) {
+                        cartRepository.addProductToCart(product, user.id)
+                        // Gửi thông báo thành công qua Channel
+                        _eventChannel.send("Đã thêm '${product.name}' vào giỏ hàng")
+                    } else {
+                        _eventChannel.send("Sản phẩm đã hết hàng")
+                    }
                 } catch (e: Exception) {
                     _eventChannel.send("Lỗi: Không thể thêm vào giỏ hàng")
                 }

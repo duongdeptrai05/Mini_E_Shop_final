@@ -1,28 +1,21 @@
 package com.example.mini_e_shop.presentation.support
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.launch
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.filled.SupportAgent
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.SentimentSatisfied
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -30,9 +23,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 
 // Dummy data class for chat messages
@@ -50,6 +45,30 @@ fun SupportScreen(
         mutableStateListOf(
             Message("Xin chào! Shop có thể giúp gì cho bạn?", isFromUser = false, showAvatar = true),
         )
+    }
+    val context = LocalContext.current
+
+    // Launcher để chụp ảnh. Kết quả trả về là một Bitmap.
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicturePreview()
+    ) { bitmap: Bitmap? ->
+        if (bitmap != null) {
+            // TODO: Xử lý ảnh bitmap (ví dụ: hiển thị trong chat, tải lên server)
+            Toast.makeText(context, "Đã chụp ảnh!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // Launcher để yêu cầu quyền.
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            // Quyền đã được cấp, khởi chạy camera
+            cameraLauncher.launch()
+        } else {
+            // Quyền bị từ chối
+            Toast.makeText(context, "Quyền truy cập camera bị từ chối.", Toast.LENGTH_SHORT).show()
+        }
     }
 
     Scaffold(
@@ -83,6 +102,22 @@ fun SupportScreen(
                         messages.add(Message(messageText, isFromUser = true, showAvatar = false))
                         messageText = ""
                         // TODO: Add bot response logic here
+                    }
+                },
+                onCameraClick = {
+                    // Kiểm tra quyền trước khi khởi chạy camera
+                    when (PackageManager.PERMISSION_GRANTED) {
+                        ContextCompat.checkSelfPermission(
+                            context,
+                            Manifest.permission.CAMERA
+                        ) -> {
+                            // Quyền đã có, khởi chạy camera
+                            cameraLauncher.launch()
+                        }
+                        else -> {
+                            // Yêu cầu quyền
+                            permissionLauncher.launch(Manifest.permission.CAMERA)
+                        }
                     }
                 }
             )
@@ -149,8 +184,10 @@ fun MessageBubble(message: Message) {
 fun MessageInputBar(
     messageText: String,
     onMessageChange: (String) -> Unit,
-    onSendClick: () -> Unit
+    onSendClick: () -> Unit,
+    onCameraClick: () -> Unit
 ) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -158,10 +195,10 @@ fun MessageInputBar(
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { /* TODO */ }) {
+        IconButton(onClick = { Toast.makeText(context, "Chức năng gửi emoji sắp ra mắt!", Toast.LENGTH_SHORT).show() }) {
             Icon(Icons.Outlined.SentimentSatisfied, contentDescription = "Emoji", tint = Color.Gray)
         }
-        IconButton(onClick = { /* TODO */ }) {
+        IconButton(onClick = onCameraClick) {
             Icon(Icons.Default.CameraAlt, contentDescription = "Attach image", tint = Color.Gray)
         }
 
