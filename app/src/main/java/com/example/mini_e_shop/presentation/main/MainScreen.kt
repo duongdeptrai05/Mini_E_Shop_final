@@ -46,7 +46,7 @@ fun MainScreen(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = Color.White, // Đặt màu nền giống màu của BottomNavigationBar để tràn viền đẹp mắt
-                shadowElevation = 8.dp // Tạo bóng nhẹ tách biệt nội dung
+                tonalElevation = 8.dp // Tạo bóng nhẹ tách biệt nội dung (Material3 dùng tonalElevation thay vì shadowElevation)
             ) {
                 Column {
                     BottomNavigationBar(navController = bottomNavController)

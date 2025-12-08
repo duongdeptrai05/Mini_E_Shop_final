@@ -57,7 +57,6 @@ class UserPreferencesManager @Inject constructor(@ApplicationContext private val
             AuthPreferences(isLoggedIn, userId, email)
         }
 
-    suspend fun saveLoginState(userId: String, email: String,rememberMe: Boolean) {
     val themeOptionFlow: Flow<ThemeOption> = context.dataStore.data
         .catch { exception ->
             if (exception is IOException) {
@@ -84,7 +83,7 @@ class UserPreferencesManager @Inject constructor(@ApplicationContext private val
             preferences[PreferenceKeys.APP_LANGUAGE] ?: "vi" // Default to Vietnamese
         }
 
-    suspend fun saveLoginState(userId: Int, email: String) {
+    suspend fun saveLoginState(userId: String, email: String, rememberMe: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.IS_LOGGED_IN] = true
             preferences[PreferenceKeys.LOGGED_IN_USER_ID] = userId
@@ -93,7 +92,8 @@ class UserPreferencesManager @Inject constructor(@ApplicationContext private val
             } else {
                 // Nếu người dùng không chọn, hãy xóa email đã lưu (nếu có)
                 preferences.remove(PreferenceKeys.REMEMBER_ME_EMAIL)
-            }        }
+            }
+        }
     }
 
     suspend fun clearLoginState() {
@@ -123,8 +123,9 @@ class UserPreferencesManager @Inject constructor(@ApplicationContext private val
     }
     suspend fun saveAuthPreferences(isLoggedIn: Boolean, userId: String) { // Nhận vào String
         context.dataStore.edit { preferences ->
-            preferences[IS_LOGGED_IN] = isLoggedIn
-            preferences[LOGGED_IN_USER_ID] = userId // Lưu String
+            preferences[PreferenceKeys.IS_LOGGED_IN] = isLoggedIn
+            preferences[PreferenceKeys.LOGGED_IN_USER_ID] = userId // Lưu String
         }
     }
 }
+

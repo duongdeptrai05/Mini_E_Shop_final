@@ -1,5 +1,6 @@
 package com.example.mini_e_shop
 
+import android.content.res.Configuration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -8,6 +9,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -92,7 +94,7 @@ class MainActivity : ComponentActivity() {
                         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
                     ) { padding -> // padding này là bắt buộc nhưng chúng ta không dùng
                         Surface(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier.fillMaxSize().padding(padding),
                             color = MaterialTheme.colorScheme.background
                         ) {
                             when (authState) {
