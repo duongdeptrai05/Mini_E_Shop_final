@@ -1,6 +1,5 @@
 package com.example.mini_e_shop.data.repository
 
-import androidx.activity.result.launch
 import com.example.mini_e_shop.data.local.SampleData
 import com.example.mini_e_shop.data.local.dao.ProductDao
 import com.example.mini_e_shop.data.local.entity.ProductEntity

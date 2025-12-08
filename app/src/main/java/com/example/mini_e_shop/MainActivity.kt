@@ -3,6 +3,7 @@ package com.example.mini_e_shop
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -39,6 +40,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
             Mini_E_ShopTheme {
                 val authViewModel = hiltViewModel<AuthViewModel>()
@@ -53,7 +55,7 @@ class MainActivity : ComponentActivity() {
                     snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
                 ) { padding -> // padding này là bắt buộc nhưng chúng ta không dùng
                     Surface(
-                        modifier = Modifier.fillMaxSize().padding(padding),
+                        modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
                         when (authState) {

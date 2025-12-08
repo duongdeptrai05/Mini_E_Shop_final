@@ -9,8 +9,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -47,6 +49,7 @@ fun SupportScreen(
         )
     }
     val context = LocalContext.current
+    var showEmojiPicker by remember { mutableStateOf(false) }
 
     // Launcher để chụp ảnh. Kết quả trả về là một Bitmap.
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -92,8 +95,31 @@ fun SupportScreen(
                     navigationIconContentColor = Color.White
                 )
             )
-        },
-        bottomBar = {
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(Color(0xFFE5F3FF))
+                    .padding(horizontal = 16.dp),
+                reverseLayout = true
+            ) {
+                items(messages.reversed()) {
+                    MessageBubble(message = it)
+                }
+            }
+
+            if (showEmojiPicker) {
+                EmojiPicker {
+                    messageText += it
+                }
+            }
+
             MessageInputBar(
                 messageText = messageText,
                 onMessageChange = { messageText = it },
@@ -101,39 +127,38 @@ fun SupportScreen(
                     if (messageText.isNotBlank()) {
                         messages.add(Message(messageText, isFromUser = true, showAvatar = false))
                         messageText = ""
-                        // TODO: Add bot response logic here
                     }
                 },
                 onCameraClick = {
-                    // Kiểm tra quyền trước khi khởi chạy camera
                     when (PackageManager.PERMISSION_GRANTED) {
-                        ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.CAMERA
-                        ) -> {
-                            // Quyền đã có, khởi chạy camera
-                            cameraLauncher.launch()
-                        }
-                        else -> {
-                            // Yêu cầu quyền
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
+                        ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) -> cameraLauncher.launch()
+                        else -> permissionLauncher.launch(Manifest.permission.CAMERA)
                     }
-                }
+                },
+                onEmojiClick = { showEmojiPicker = !showEmojiPicker }
             )
         }
+    }
+}
+
+@Composable
+fun EmojiPicker(onEmojiSelected: (String) -> Unit) {
+    val emojis = listOf("😊", "😂", "❤️", "👍", "🤔", "🙏", "🎉", "😍", "😢", "😡")
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFE5F3FF))
-                .padding(it)
-                .padding(horizontal = 16.dp),
-            reverseLayout = true
-        ) {
-            items(messages.reversed()) {
-                MessageBubble(message = it)
-            }
+        items(emojis) {
+            Text(
+                text = it,
+                fontSize = 24.sp,
+                modifier = Modifier
+                    .clickable { onEmojiSelected(it) }
+                    .padding(horizontal = 8.dp)
+            )
         }
     }
 }
@@ -148,7 +173,7 @@ fun MessageBubble(message: Message) {
     ) {
         if (!message.isFromUser && message.showAvatar) {
             Image(
-                imageVector = Icons.Default.Person, // Using a vector asset
+                imageVector = Icons.Default.Person,
                 contentDescription = "Avatar",
                 modifier = Modifier
                     .size(40.dp)
@@ -158,7 +183,7 @@ fun MessageBubble(message: Message) {
             )
             Spacer(modifier = Modifier.width(8.dp))
         } else if (!message.isFromUser) {
-            Spacer(modifier = Modifier.width(48.dp)) // Spacer to align messages
+            Spacer(modifier = Modifier.width(48.dp))
         }
 
         Box(
@@ -185,9 +210,9 @@ fun MessageInputBar(
     messageText: String,
     onMessageChange: (String) -> Unit,
     onSendClick: () -> Unit,
-    onCameraClick: () -> Unit
+    onCameraClick: () -> Unit,
+    onEmojiClick: () -> Unit
 ) {
-    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -195,7 +220,7 @@ fun MessageInputBar(
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { Toast.makeText(context, "Chức năng gửi emoji sắp ra mắt!", Toast.LENGTH_SHORT).show() }) {
+        IconButton(onClick = onEmojiClick) {
             Icon(Icons.Outlined.SentimentSatisfied, contentDescription = "Emoji", tint = Color.Gray)
         }
         IconButton(onClick = onCameraClick) {

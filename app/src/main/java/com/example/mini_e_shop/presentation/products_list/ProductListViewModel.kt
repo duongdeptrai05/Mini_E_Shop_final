@@ -19,7 +19,8 @@ enum class SortType {
     NONE, // Mặc định
     PRICE_ASC, // Giá tăng dần
     PRICE_DESC, // Giá giảm dần
-    NAME_ASC // Tên A-Z
+    NAME_ASC, // Tên A-Z
+    NAME_DESC // Tên Z-A
 }
 
 @OptIn(FlowPreview::class)
@@ -83,6 +84,7 @@ class ProductListViewModel @Inject constructor(
             SortType.PRICE_ASC -> categorizedProducts.sortedBy { it.price }
             SortType.PRICE_DESC -> categorizedProducts.sortedByDescending { it.price }
             SortType.NAME_ASC -> categorizedProducts.sortedBy { it.name }
+            SortType.NAME_DESC -> categorizedProducts.sortedByDescending { it.name }
             SortType.NONE -> categorizedProducts // Không sắp xếp
         }
 

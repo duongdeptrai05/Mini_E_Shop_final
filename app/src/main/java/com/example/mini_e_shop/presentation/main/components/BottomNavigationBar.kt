@@ -3,7 +3,11 @@ package com.example.mini_e_shop.presentation.main.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -39,9 +43,10 @@ fun BottomNavigationBar(navController: NavController) {
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 8.dp,
+        windowInsets = WindowInsets(0), // tránh bị khuyết do inset mặc định
         modifier = Modifier
-            .height(70.dp)
-            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+            .height(72.dp) // cao hơn 1 chút để đủ không gian icon + nhãn
+            .fillMaxWidth()
     ) {
         items.forEach { screen ->
             val isSelected = currentRoute == screen.route
@@ -50,7 +55,7 @@ fun BottomNavigationBar(navController: NavController) {
                 animationSpec = tween(durationMillis = 200),
                 label = "scale"
             )
-            
+
             // Màu sắc riêng cho từng trang
             val pageColor = when (screen.route) {
                 Screen.Home.route -> HomeColor
@@ -59,7 +64,7 @@ fun BottomNavigationBar(navController: NavController) {
                 Screen.Profile.route -> ProfileColor
                 else -> PrimaryIndigo
             }
-            
+
             val pageColorLight = when (screen.route) {
                 Screen.Home.route -> HomeColorLight
                 Screen.Favorites.route -> FavoritesColorLight

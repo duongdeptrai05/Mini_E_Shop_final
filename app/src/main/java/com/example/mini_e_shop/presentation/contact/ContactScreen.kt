@@ -42,7 +42,7 @@ import com.example.mini_e_shop.R
 data class Contact(val name: String, val title: String, @DrawableRes val imageResId: Int)
 
 val dummyContacts = listOf(
-    Contact("Trương Duy Mạnh", "Ngồi nhìn không biết làm gì", R.drawable.avt_duym),
+    Contact("Trương Duy Mạnh", "Nhân viên tư vấn", R.drawable.avt_duym),
     Contact("Bùi Đức Dương", "Hỗ trợ kỹ thuật", R.drawable.avt_duong),
     Contact("Trần Đình Mạnh", "Quản lý đơn hàng", R.drawable.avt_dinhm)
 )

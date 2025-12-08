@@ -39,6 +39,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "11"
+        languageVersion = "1.9"
     }
     buildFeatures {
         compose = true
@@ -55,6 +56,7 @@ dependencies {
     // --- QUAY LẠI PHIÊN BẢN MỚI NHẤT CỦA ROOM ---
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation(libs.androidx.compose.foundation)
     kapt("androidx.room:room-compiler:2.6.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
