@@ -24,12 +24,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.mini_e_shop.R
 import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.ui.theme.*
 import kotlinx.coroutines.flow.collectLatest
@@ -162,7 +164,7 @@ fun CompactHeader(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "Điện tử Đình Mạnh",
+                text = stringResource(id = R.string.dinh_manh_electronics),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -177,7 +179,7 @@ fun CompactHeader(
             ) {
                 Icon(
                     Icons.Default.ContactSupport,
-                    contentDescription = "Support",
+                    contentDescription = stringResource(id = R.string.support),
                     tint = HomeColor,
                     modifier = Modifier.size(24.dp)
                 )
@@ -191,7 +193,7 @@ fun CompactHeader(
                 .fillMaxWidth()
                 .height(50.dp), 
             placeholder = {
-                Text("Tìm kiếm tại Đình Mạnh...", fontSize = 14.sp, color = TextLight)
+                Text(stringResource(id = R.string.search_products), fontSize = 14.sp, color = TextLight)
             },
             leadingIcon = {
                 Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp))
@@ -230,7 +232,7 @@ private fun CompactSortButton(
         ) {
             Icon(
                 Icons.Default.Sort,
-                contentDescription = "Sort",
+                contentDescription = stringResource(id = R.string.sort),
                 tint = if(selectedSortType != SortType.NONE) Color.White else TextSecondary,
                 modifier = Modifier.size(20.dp)
             )
@@ -240,10 +242,11 @@ private fun CompactSortButton(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            val options = listOf(
-                SortType.PRICE_ASC to "Giá tăng dần",
-                SortType.PRICE_DESC to "Giá giảm dần",
-                SortType.NAME_ASC to "Tên A-Z"
+            val options = mapOf(
+                SortType.PRICE_ASC to stringResource(id = R.string.price_asc),
+                SortType.PRICE_DESC to stringResource(id = R.string.price_desc),
+                SortType.NAME_ASC to stringResource(id = R.string.name_asc),
+                SortType.NAME_DESC to stringResource(id = R.string.name_desc)
             )
 
             options.forEach { (type, label) ->
@@ -262,13 +265,30 @@ private fun CompactSortButton(
             }
             Divider()
             DropdownMenuItem(
-                text = { Text("Mặc định", color = TextSecondary) },
+                text = { Text(stringResource(id = R.string.default_sort), color = TextSecondary) },
                 onClick = {
                     onSortTypeSelected(SortType.NONE)
                     expanded = false
                 }
             )
         }
+    }
+}
+
+@Composable
+private fun getCategoryStringResource(category: String): String {
+    return when (category) {
+        "Tất cả" -> stringResource(id = R.string.category_all)
+        "Điện thoại" -> stringResource(id = R.string.category_phone)
+        "Laptop" -> stringResource(id = R.string.category_laptop)
+        "Tai nghe" -> stringResource(id = R.string.category_headphone)
+        "Máy tính bảng" -> stringResource(id = R.string.category_tablet)
+        "Đồng hồ" -> stringResource(id = R.string.category_watch)
+        "Máy ảnh" -> stringResource(id = R.string.category_camera)
+        "Gaming" -> stringResource(id = R.string.category_gaming)
+        "Màn hình" -> stringResource(id = R.string.category_monitor)
+        "Phụ kiện" -> stringResource(id = R.string.category_accessory)
+        else -> category
     }
 }
 
@@ -291,7 +311,7 @@ private fun CategoryTabs(
                 onClick = { onCategorySelected(category) },
                 label = {
                     Text(
-                        text = category,
+                        text = getCategoryStringResource(category = category),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                     )
@@ -324,7 +344,7 @@ fun ProductCard(
     isFavorite: Boolean
 ) {
     val isOutOfStock = product.stock == 0
-    // Mock data để demo giao diện đầy đủ (Sau này bạn thêm vào Product Entity)
+    // Mock data để demo giao diện đầy đủ
     val rating = 4.8
     val soldCount = 120
 
@@ -368,13 +388,13 @@ fun ProductCard(
                                 .padding(2.dp),
                             horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = PrimaryIndigo, modifier = Modifier.size(20.dp).clickable { onEdit() })
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = ErrorRed, modifier = Modifier.size(20.dp).clickable { onDelete() })
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.edit), tint = PrimaryIndigo, modifier = Modifier.size(20.dp).clickable { onEdit() })
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete), tint = ErrorRed, modifier = Modifier.size(20.dp).clickable { onDelete() })
                         }
                     } else {
                         Icon(
                             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = "Favorite",
+                            contentDescription = stringResource(id = R.string.favorites),
                             tint = if (isFavorite) Color.Red else Color.Gray,
                             modifier = Modifier
                                 .size(24.dp)
@@ -393,7 +413,7 @@ fun ProductCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "HẾT HÀNG",
+                            text = stringResource(id = R.string.out_of_stock).uppercase(),
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.labelMedium
@@ -455,7 +475,7 @@ fun ProductCard(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Đã bán $soldCount",
+                        text = stringResource(R.string.sold_count, soldCount),
                         style = MaterialTheme.typography.labelSmall,
                         color = TextSecondary,
                         fontSize = 11.sp
@@ -489,7 +509,7 @@ fun ProductCard(
                         ) {
                             Icon(
                                 Icons.Outlined.AddShoppingCart,
-                                contentDescription = "Add",
+                                contentDescription = stringResource(id = R.string.add_to_cart),
                                 tint = Color.White,
                                 modifier = Modifier.size(18.dp)
                             )

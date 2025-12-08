@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,10 +26,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.mini_e_shop.R
 import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.ui.theme.PrimaryBlue
 import java.text.DecimalFormat
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,10 +43,10 @@ fun ProductDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Chi tiết sản phẩm") },
+                title = { Text(text = stringResource(id = R.string.product_detail_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 }
             )
@@ -148,17 +149,17 @@ private fun StockBadge(stock: Int) {
         stock > 10 -> Triple(
             Color(0xFFE6F4EA),
             Color(0xFF1E8E3E),
-            "$stock sản phẩm có sẵn"
+            stringResource(id = R.string.stock_available, stock)
         )
         stock in 1..10 -> Triple(
             Color(0xFFFFF4E5),
             Color(0xFFB26B00),
-            "Còn $stock sản phẩm"
+            stringResource(id = R.string.stock_few_left, stock)
         )
         else -> Triple(
             Color(0xFFFFEBEE),
             Color(0xFFC62828),
-            "Hết hàng"
+            stringResource(id = R.string.out_of_stock)
         )
     }
 
@@ -235,8 +236,8 @@ fun ProductDetailsContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                InfoChip(label = "Danh mục", value = product.category)
-                InfoChip(label = "Xuất xứ", value = product.origin)
+                InfoChip(label = stringResource(id = R.string.category), value = product.category)
+                InfoChip(label = stringResource(id = R.string.origin), value = product.origin)
             }
 
             StockBadge(stock = product.stock)
@@ -244,7 +245,7 @@ fun ProductDetailsContent(
             Divider()
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Mô tả sản phẩm",
+                text = stringResource(id = R.string.product_description),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -256,16 +257,16 @@ fun ProductDetailsContent(
             Spacer(modifier = Modifier.height(12.dp))
             Divider()
             Text(
-                text = "Thông tin chi tiết",
+                text = stringResource(id = R.string.product_information),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
-            InfoRow(label = "Thương hiệu", value = product.brand)
-            InfoRow(label = "Danh mục", value = product.category)
-            InfoRow(label = "Xuất xứ", value = product.origin)
+            InfoRow(label = stringResource(id = R.string.brand), value = product.brand)
+            InfoRow(label = stringResource(id = R.string.category), value = product.category)
+            InfoRow(label = stringResource(id = R.string.origin), value = product.origin)
             InfoRow(
-                label = "Tồn kho",
-                value = if (product.stock > 0) "${product.stock} sản phẩm" else "Hết hàng"
+                label = stringResource(id = R.string.stock_label),
+                value = if (product.stock > 0) stringResource(id = R.string.stock_count, product.stock) else stringResource(id = R.string.out_of_stock)
             )
         }
 
@@ -287,9 +288,9 @@ private fun AddToCartBar(onAddToCart: () -> Unit) {
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(Icons.Default.AddShoppingCart, contentDescription = "Add to cart")
+            Icon(Icons.Default.AddShoppingCart, contentDescription = stringResource(id = R.string.add_to_cart))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = "Thêm vào giỏ hàng", fontSize = 16.sp)
+            Text(text = stringResource(id = R.string.add_to_cart), fontSize = 16.sp)
         }
     }
 }

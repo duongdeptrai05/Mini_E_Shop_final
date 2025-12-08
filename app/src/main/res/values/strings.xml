@@ -1,3 +1,72 @@
 <resources>
     <string name="app_name">Mini_E_Shop</string>
+    <string name="settings">Cài đặt</string>
+    <string name="language">Ngôn ngữ</string>
+    <string name="account">Tài khoản</string>
+    <string name="my_orders">Đơn hàng của tôi</string>
+    <string name="purchase_history">Lịch sử mua hàng</string>
+    <string name="logout">Đăng xuất</string>
+    <string name="personal_information">Thông tin cá nhân</string>
+    <string name="application">Ứng dụng</string>
+    <string name="notifications">Thông báo</string>
+    <string name="dark_mode">Chế độ tối</string>
+    <string name="support">Hỗ trợ</string>
+    <string name="privacy_policy">Chính sách bảo mật</string>
+    <string name="help">Trợ giúp</string>
+    <string name="about_shopmini">Về ShopMini</string>
+    <string name="update_info_success">Cập nhật thông tin thành công</string>
+    <string name="notifications_on_success">Đã bật thông báo thành công</string>
+    <string name="notifications_off_success">Đã tắt thông báo thành công</string>
+    <string name="dark_mode_on_success">Đã bật chế độ tối thành công</string>
+    <string name="dark_mode_off_success">Đã tắt chế độ tối thành công</string>
+    <string name="select_language">Chọn ngôn ngữ</string>
+    <string name="cancel">Hủy</string>
+    <string name="save">Lưu</string>
+    <string name="on">Bật</string>
+    <string name="off">Tắt</string>
+    <string name="home">Trang chủ</string>
+    <string name="favorites">Yêu thích</string>
+    <string name="cart">Giỏ hàng</string>
+    <string name="profile">Cá nhân</string>
+    <string name="dinh_manh_electronics">Điện tử Đình Mạnh</string>
+    <string name="search_products">Tìm kiếm sản phẩm...</string>
+    <string name="sort">Sắp xếp</string>
+    <string name="default_sort">Mặc định</string>
+    <string name="price_asc">Giá tăng dần</string>
+    <string name="price_desc">Giá giảm dần</string>
+    <string name="name_asc">Tên A-Z</string>
+    <string name="name_desc">Tên Z-A</string>
+    <string name="stock">Kho:</string>
+    <string name="add_to_cart">Thêm vào giỏ</string>
+    <string name="edit">Sửa</string>
+    <string name="delete">Xóa</string>
+    <string name="out_of_stock">Hết hàng</string>
+    <string name="category_all">Tất cả</string>
+    <string name="category_phone">Điện thoại</string>
+    <string name="category_laptop">Laptop</string>
+    <string name="category_headphone">Tai nghe</string>
+    <string name="category_tablet">Máy tính bảng</string>
+    <string name="category_watch">Đồng hồ</string>
+    <string name="category_camera">Máy ảnh</string>
+    <string name="category_gaming">Gaming</string>
+    <string name="category_monitor">Màn hình</string>
+    <string name="category_accessory">Phụ kiện</string>
+    <string name="sold_count">Đã bán %1$d</string>
+
+    <!-- Product Detail Screen -->
+    <string name="product_detail_title">Chi tiết sản phẩm</string>
+    <string name="back">Quay lại</string>
+    <string name="category">Danh mục</string>
+    <string name="origin">Xuất xứ</string>
+    <string name="stock_available">%1$d sản phẩm có sẵn</string>
+    <string name="stock_few_left">Còn %1$d sản phẩm</string>
+    <string name="product_description">Mô tả sản phẩm</string>
+    <string name="product_information">Thông tin chi tiết</string>
+    <string name="brand">Thương hiệu</string>
+    <string name="stock_label">Tồn kho</string>
+    <string name="stock_count">%1$d sản phẩm</string>
+
+    <!-- Favorites Screen -->
+    <string name="favorite_products">Sản phẩm yêu thích</string>
+    <string name="no_favorite_products">Bạn chưa có sản phẩm yêu thích nào.</string>
 </resources>

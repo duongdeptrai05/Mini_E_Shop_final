@@ -1,12 +1,14 @@
 package com.example.mini_e_shop.presentation.navigation
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.mini_e_shop.R
 
 sealed class Screen(
     val route: String,
-    val title: String? = null,
+    @StringRes val title: Int? = null,
     val icon: ImageVector? = null
 ) {
     // Luồng xác thực
@@ -19,22 +21,22 @@ sealed class Screen(
     // Các màn hình trong Bottom Nav
     object Home : Screen(
         route = "home",
-        title = "Trang chủ",
+        title = R.string.home,
         icon = Icons.Default.Home
     )
     object Favorites : Screen(
         route = "favorites",
-        title = "Yêu thích",
+        title = R.string.favorites,
         icon = Icons.Default.Favorite
     )
     object Cart : Screen(
         route = "cart",
-        title = "Giỏ hàng",
+        title = R.string.cart,
         icon = Icons.Default.ShoppingCart
     )
     object Profile : Screen(
         route = "profile",
-        title = "Cá nhân",
+        title = R.string.profile,
         icon = Icons.Default.Person
     )
 
@@ -43,7 +45,7 @@ sealed class Screen(
     object AddEditProduct : Screen(route = "add_edit_product")
     object ProductDetail : Screen("product_detail")
     object Support : Screen("support")
-    object Checkout : Screen("checkout")
     object Contact : Screen("contact")
+    object Checkout : Screen("checkout")
     object Settings : Screen("settings")
 }

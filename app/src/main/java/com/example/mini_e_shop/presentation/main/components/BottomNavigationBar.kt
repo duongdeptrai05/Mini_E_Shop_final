@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mini_e_shop.presentation.navigation.Screen
@@ -86,7 +87,7 @@ fun BottomNavigationBar(navController: NavController) {
                     ) {
                         Icon(
                             imageVector = screen.icon!!,
-                            contentDescription = screen.title,
+                            contentDescription = screen.title?.let{ stringResource(id = it) },
                             modifier = Modifier
                                 .scale(scale)
                                 .size(22.dp),
@@ -95,12 +96,16 @@ fun BottomNavigationBar(navController: NavController) {
                     }
                 },
                 label = {
-                    Text(
-                        text = screen.title!!,
-                        fontSize = 11.sp,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        color = if (isSelected) pageColor else TextSecondary
-                    )
+                    if (isSelected) {
+                        screen.title?.let {
+                            Text(
+                                text = stringResource(id = it),
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = PrimaryIndigo
+                            )
+                        }
+                    }
                 },
                 selected = isSelected,
                 onClick = {

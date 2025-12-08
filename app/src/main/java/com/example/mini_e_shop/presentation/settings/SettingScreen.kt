@@ -28,10 +28,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mini_e_shop.R
 import com.example.mini_e_shop.data.local.entity.UserEntity
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,12 +60,10 @@ fun SettingsScreen(
 
     if (showLanguageDialog) {
         LanguageSelectionDialog(
-            currentLanguage = state.language,
+            currentLanguageCode = state.languageCode,
             onDismiss = { showLanguageDialog = false },
-            onLanguageSelected = { language ->
-                viewModel.changeLanguage(language)
-                showLanguageDialog = false
-                Toast.makeText(context, "Đã chuyển sang $language", Toast.LENGTH_SHORT).show()
+            onLanguageSelected = { languageCode ->
+                viewModel.changeLanguage(languageCode)
             }
         )
     }
@@ -76,7 +76,7 @@ fun SettingsScreen(
             onSave = { name, email ->
                 viewModel.updateUserInfo(name, email)
                 showEditInfoDialog = false
-                Toast.makeText(context, "Cập nhật thông tin thành công", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.update_info_success), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -94,11 +94,11 @@ fun SettingsScreen(
             }
         )
     }
-    
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Cài đặt", fontWeight = FontWeight.SemiBold, fontSize = 18.sp) },
+                title = { Text(stringResource(id = R.string.settings), fontWeight = FontWeight.SemiBold, fontSize = 18.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -120,62 +120,62 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // Section Tài khoản
-            SettingsSection(title = "Tài khoản") {
+            SettingsSection(title = stringResource(id = R.string.account)) {
                 SettingsTile(
                     icon = Icons.Outlined.Person,
                     iconColor = Color(0xFF3B82F6), // Blue
-                    title = "Thông tin cá nhân",
+                    title = stringResource(id = R.string.personal_information),
                     value = state.name,
                     onClick = { showEditInfoDialog = true }
                 )
             }
 
             // Section Ứng dụng
-            SettingsSection(title = "Ứng dụng") {
+            SettingsSection(title = stringResource(id = R.string.application)) {
                 // Notifications
                 SettingsSwitchTile(
                     icon = Icons.Outlined.Notifications,
                     iconColor = Color(0xFFF97316), // Orange
-                    title = "Thông báo",
+                    title = stringResource(id = R.string.notifications),
                     checked = state.notificationsEnabled,
-                    onCheckedChange = { 
+                    onCheckedChange = {
                         viewModel.toggleNotifications(it)
-                        val message = if (it) "Đã bật thông báo thành công" else "Đã tắt thông báo thành công"
+                        val message = if (it) context.getString(R.string.notifications_on_success) else context.getString(R.string.notifications_off_success)
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
                 )
                 Divider(color = Color(0xFFF3F4F6), thickness = 1.dp)
-                
+
                 // Language
                 SettingsTile(
                     icon = Icons.Outlined.Language,
                     iconColor = Color(0xFF10B981), // Green
-                    title = "Ngôn ngữ",
+                    title = stringResource(id = R.string.language),
                     value = state.language,
                     onClick = { showLanguageDialog = true }
                 )
                 Divider(color = Color(0xFFF3F4F6), thickness = 1.dp)
-                
+
                 // Dark Mode
                 SettingsSwitchTile(
                     icon = Icons.Outlined.DarkMode,
                     iconColor = Color(0xFF8B5CF6), // Purple
-                    title = "Chế độ tối",
+                    title = stringResource(id = R.string.dark_mode),
                     checked = state.darkModeEnabled,
-                    onCheckedChange = { 
+                    onCheckedChange = {
                         viewModel.toggleDarkMode(it)
-                        val message = if (it) "Đã bật chế độ tối thành công" else "Đã tắt chế độ tối thành công"
+                        val message = if (it) context.getString(R.string.dark_mode_on_success) else context.getString(R.string.dark_mode_off_success)
                         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     }
                 )
             }
 
             // Section Hỗ trợ
-            SettingsSection(title = "Hỗ trợ") {
+            SettingsSection(title = stringResource(id = R.string.support)) {
                 SettingsTile(
                     icon = Icons.Outlined.Security, // Shield
                     iconColor = Color(0xFFEF4444), // Red
-                    title = "Chính sách bảo mật",
+                    title = stringResource(id = R.string.privacy_policy),
                     onClick = { showPrivacyPolicyDialog = true }
                 )
                 Divider(color = Color(0xFFF3F4F6), thickness = 1.dp)
@@ -183,7 +183,7 @@ fun SettingsScreen(
                 SettingsTile(
                     icon = Icons.Outlined.HelpOutline,
                     iconColor = Color(0xFF06B6D4), // Cyan
-                    title = "Trợ giúp",
+                    title = stringResource(id = R.string.help),
                     onClick = { showHelpDialog = true }
                 )
                 Divider(color = Color(0xFFF3F4F6), thickness = 1.dp)
@@ -191,12 +191,12 @@ fun SettingsScreen(
                 SettingsTile(
                     icon = Icons.Outlined.Info,
                     iconColor = Color(0xFF6B7280), // Gray
-                    title = "Về ShopMini",
+                    title = stringResource(id = R.string.about_shopmini),
                     value = "v1.0.0",
                     onClick = { /* TODO */ }
                 )
             }
-            
+
             // Footer
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
@@ -270,7 +270,7 @@ fun EditInfoDialog(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF3F4F6), contentColor = Color.Black),
                     elevation = ButtonDefaults.buttonElevation(0.dp)
                 ) {
-                    Text("Hủy", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.cancel), fontWeight = FontWeight.SemiBold)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Button(
@@ -282,7 +282,7 @@ fun EditInfoDialog(
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6366F1)),
                     elevation = ButtonDefaults.buttonElevation(0.dp)
                 ) {
-                    Text("Lưu", fontWeight = FontWeight.SemiBold)
+                    Text(stringResource(id = R.string.save), fontWeight = FontWeight.SemiBold)
                 }
             }
         }
@@ -338,7 +338,7 @@ fun PrivacyPolicyDialog(onDismiss: () -> Unit) {
                 title = "Thông tin chúng tôi thu thập",
                 content = "Chúng tôi chỉ thu thập thông tin cần thiết như tên, email, địa chỉ và số điện thoại để xử lý đơn hàng của bạn."
             )
-            
+
             PolicyItem(
                 icon = Icons.Outlined.Lock,
                 iconColor = Color(0xFF10B981),
@@ -399,7 +399,7 @@ fun HelpDialog(
     FullScreenDialog(title = "Trợ giúp", onDismiss = onDismiss) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text("Liên hệ với chúng tôi", fontWeight = FontWeight.SemiBold, color = Color.Gray)
-            
+
             ContactItem(
                 icon = Icons.Outlined.Phone,
                 iconColor = Color(0xFF3B82F6),
@@ -468,10 +468,10 @@ fun HelpDialog(
                     Text("Thứ 7 - Chủ nhật: 9:00 - 21:00", color = Color.White.copy(alpha = 0.9f), fontSize = 14.sp)
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(8.dp))
             Text("Câu hỏi thường gặp", fontWeight = FontWeight.SemiBold, color = Color.Gray)
-            
+
             FAQItem(
                 question = "Làm sao để theo dõi đơn hàng?",
                 answer = "Bạn có thể theo dõi đơn hàng bằng cách vào phần 'Cá nhân' > 'Đơn hàng của tôi'. Tại đây bạn sẽ thấy trạng thái và thông tin chi tiết của tất cả đơn hàng."
@@ -564,7 +564,7 @@ fun FAQItem(question: String, answer: String) {
                     tint = Color.Gray
                 )
             }
-            
+
             // Hiệu ứng mở rộng/thu gọn
             AnimatedVisibility(
                 visible = expanded,
@@ -645,36 +645,36 @@ fun FullScreenDialog(title: String, onDismiss: () -> Unit, content: @Composable 
 
 @Composable
 fun LanguageSelectionDialog(
-    currentLanguage: String,
+    currentLanguageCode: String,
     onDismiss: () -> Unit,
     onLanguageSelected: (String) -> Unit
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Chọn ngôn ngữ", fontWeight = FontWeight.Bold) },
+        title = { Text(text = stringResource(id = R.string.select_language), fontWeight = FontWeight.Bold) },
         text = {
             Column {
-                listOf("Tiếng Việt", "English").forEach { language ->
+                mapOf("vi" to "Tiếng Việt", "en" to "English").forEach { (code, name) ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onLanguageSelected(language) }
+                            .clickable { onLanguageSelected(code) }
                             .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         RadioButton(
-                            selected = (language == currentLanguage),
-                            onClick = { onLanguageSelected(language) }
+                            selected = (code == currentLanguageCode),
+                            onClick = { onLanguageSelected(code) }
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(text = language, fontSize = 16.sp)
+                        Text(text = name, fontSize = 16.sp)
                     }
                 }
             }
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Hủy")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )
@@ -801,10 +801,8 @@ fun SettingsSwitchTile(
             modifier = Modifier.weight(1f)
         )
         
-        // Custom Text "Bật" / "Tắt" next to switch? The image has "Bật" then arrow.
-        // But here we use Switch. I'll add text "Bật/Tắt" for better UX matching the image text somewhat.
         Text(
-            text = if (checked) "Bật" else "Tắt",
+            text = if (checked) stringResource(id = R.string.on) else stringResource(id = R.string.off),
             fontSize = 14.sp,
             color = Color.Gray,
             modifier = Modifier.padding(end = 8.dp)

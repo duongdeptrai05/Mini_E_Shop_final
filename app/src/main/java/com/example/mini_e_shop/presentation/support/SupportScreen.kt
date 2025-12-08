@@ -31,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 // Dummy data class for chat messages
 data class Message(val text: String, val isFromUser: Boolean, val showAvatar: Boolean)
@@ -50,6 +52,7 @@ fun SupportScreen(
     }
     val context = LocalContext.current
     var showEmojiPicker by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     // Launcher để chụp ảnh. Kết quả trả về là một Bitmap.
     val cameraLauncher = rememberLauncherForActivityResult(
@@ -127,6 +130,10 @@ fun SupportScreen(
                     if (messageText.isNotBlank()) {
                         messages.add(Message(messageText, isFromUser = true, showAvatar = false))
                         messageText = ""
+                        scope.launch {
+                            delay(1000) // Add a 1-second delay
+                            messages.add(Message("Tính năng đang được phát triển", isFromUser = false, showAvatar = true))
+                        }
                     }
                 },
                 onCameraClick = {
