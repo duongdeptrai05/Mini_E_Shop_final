@@ -97,8 +97,10 @@ class AuthViewModel @Inject constructor(
             val isAdmin = userEntity?.isAdmin ?: false
             // Debug logging để kiểm tra quyền admin
             if (userEntity != null) {
+                android.util.Log.d("AuthViewModel", "User ${userEntity.id} - Email: ${userEntity.email} - isAdmin from entity: ${userEntity.isAdmin}, mapped isAdmin: $isAdmin")
                 println("AuthViewModel: User ${userEntity.id} - Email: ${userEntity.email} - isAdmin: ${userEntity.isAdmin}")
             } else {
+                android.util.Log.w("AuthViewModel", "userEntity is null")
                 println("AuthViewModel: userEntity is null")
             }
             // Dù userEntity là null hay không, chúng ta đều gói nó trong Success state

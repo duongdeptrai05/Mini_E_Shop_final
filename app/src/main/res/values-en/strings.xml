@@ -124,4 +124,11 @@
     <string name="support_attach_image_icon">Attach image</string>
     <string name="support_message_placeholder">Enter message...</string>
     <string name="support_send_icon">Send</string>
+    <string name="permission_denied">You do not have permission to perform this action</string>
+    <string name="order_paid">Paid</string>
+    <string name="order_pending">Pending Payment</string>
+    <string name="enter_image_url">Enter Image URL</string>
+    <string name="image_url_placeholder">https://example.com/image.jpg</string>
+    <string name="add_edit_product">Add/Edit Product</string>
+    <string name="image_load_error">Failed to load image</string>
 </resources>

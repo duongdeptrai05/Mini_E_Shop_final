@@ -1,14 +1,6 @@
 package com.example.mini_e_shop.presentation.add_edit_product
 
-import android.net.Uri
-import android.os.Build
-import android.Manifest
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -26,11 +18,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
+import coil.compose.AsyncImagePainter
 import coil.request.ImageRequest
+import com.example.mini_e_shop.R
 import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,32 +44,12 @@ fun AddEditProductScreen(
         }
     }
 
-    // thay dổi mới thêm ảnh thừ thư viện ảnh của thiết bị
-    // --- THAY ĐỔI 1: Tạo launcher để chọn ảnh ---
-    val imagePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
-    ) { uri: Uri? ->
-        // Khi người dùng chọn ảnh, cập nhật ViewModel
-        viewModel.onImageUriChange(uri)
-    }
-
-    // --- THAY ĐỔI 2: Tạo launcher để xin quyền truy cập bộ nhớ ---
-    // Chỉ cần xin quyền cho Android phiên bản mới
-    val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted: Boolean ->
-        if (isGranted) {
-            // Nếu được cấp quyền, mở trình chọn ảnh
-            imagePickerLauncher.launch("image/*")
-        } else {
-            // TODO: Hiển thị thông báo cho người dùng biết cần cấp quyền
-        }
-    }
     Scaffold(
+        contentWindowInsets = WindowInsets.statusBars,
         topBar = {
             // Sử dụng TopAppBar để có nút Quay lại và nút Lưu rõ ràng.
             TopAppBar(
-                title = { Text("Thêm/Sửa Sản phẩm") },
+                title = { Text(stringResource(R.string.add_edit_product)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) { // Gọi onBack khi nhấn nút quay lại.
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -83,7 +59,8 @@ fun AddEditProductScreen(
                     IconButton(onClick = { viewModel.saveProduct() }) {
                         Icon(Icons.Default.Done, contentDescription = "Save Product")
                     }
-                }
+                },
+                windowInsets = WindowInsets.statusBars // Sử dụng statusBars để tự động tính toán padding
             )
         }
 
@@ -95,8 +72,7 @@ fun AddEditProductScreen(
         val origin by viewModel.origin.collectAsState()
         val price by viewModel.price.collectAsState()
         val stock by viewModel.stock.collectAsState()
-//        val imageUrl by viewModel.imageUrl.collectAsState() // code cũ
-        val imageUri by viewModel.imageUri.collectAsState() // code mới
+        val imageUrl by viewModel.imageUrl.collectAsState()
         val description by viewModel.description.collectAsState()
 
         // 4. THÊM CÁC TEXTFIELD CÒN LẠI VÀ THÊM CUỘN DỌC.
@@ -108,45 +84,51 @@ fun AddEditProductScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // --- THAY ĐỔI 3: Khu vực hiển thị và chọn ảnh ---
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
-                    .clickable {
-                        // Khi nhấn vào, kiểm tra và xin quyền nếu cần
-                        val permission =
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                Manifest.permission.READ_MEDIA_IMAGES
-                            } else {
-                                Manifest.permission.READ_EXTERNAL_STORAGE
-                            }
-                        permissionLauncher.launch(permission)
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                if (imageUri != null) {
-                    // Nếu đã có ảnh, hiển thị ảnh đó
-                    Image(
-                        painter = rememberAsyncImagePainter(
-                            ImageRequest.Builder(LocalContext.current)
-                                .data(imageUri)
-                                .crossfade(true)
-                                .build()
-                        ),
-                        contentDescription = "Product Image",
+            // --- Khu vực nhập link ảnh và hiển thị preview ---
+            OutlinedTextField(
+                value = imageUrl,
+                onValueChange = viewModel::onImageUrlChange,
+                label = { Text(stringResource(R.string.enter_image_url)) },
+                placeholder = { Text(stringResource(R.string.image_url_placeholder)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+            
+            // Hiển thị preview ảnh nếu có URL
+            if (imageUrl.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageUrl)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Product Image Preview",
                         modifier = Modifier.fillMaxSize(),
                         contentScale = ContentScale.Crop
-                    )
-                } else {
-                    // Nếu chưa có ảnh, hiển thị văn bản hướng dẫn
-                    Text(
-                        text = "Nhấn để chọn ảnh sản phẩm",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+                    ) {
+                        when (painter.state) {
+                            is AsyncImagePainter.State.Loading -> {
+                                CircularProgressIndicator(modifier = Modifier.size(48.dp))
+                            }
+                            is AsyncImagePainter.State.Error -> {
+                                Text(
+                                    text = stringResource(R.string.image_load_error),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                            else -> {
+                                SubcomposeAsyncImageContent()
+                            }
+                        }
+                    }
                 }
             }
             OutlinedTextField(value = name, onValueChange = viewModel::onNameChange, label = { Text("Tên sản phẩm") }, modifier = Modifier.fillMaxWidth())

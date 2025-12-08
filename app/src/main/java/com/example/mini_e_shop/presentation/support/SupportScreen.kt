@@ -91,6 +91,7 @@ fun SupportScreen(
     }
 
     Scaffold(
+        contentWindowInsets = WindowInsets.statusBars,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.support_chat_title), fontWeight = FontWeight.Bold) },
@@ -109,7 +110,8 @@ fun SupportScreen(
                     titleContentColor = Color.White,
                     actionIconContentColor = Color.White,
                     navigationIconContentColor = Color.White
-                )
+                ),
+                windowInsets = WindowInsets.statusBars // Sử dụng statusBars để tự động tính toán padding
             )
         }
     ) { padding ->

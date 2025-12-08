@@ -47,6 +47,9 @@ fun ProductListScreen(
     onProductClick: (String) -> Unit,
     onNavigateToSupport: () -> Unit
 ) {
+    // Debug: Log giá trị isAdmin
+    android.util.Log.d("ProductListScreen", "isAdmin value: $isAdmin")
+    
     val uiState by viewModel.uiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val selectedCategory by viewModel.selectedCategory.collectAsState()
@@ -83,6 +86,7 @@ fun ProductListScreen(
                     event == "ADD_TO_CART_ERROR" -> addToCartErrorMessage
                     event == "FAVORITE_ACTION_ERROR" -> favoriteActionErrorMessage
                     event == "PLEASE_LOGIN" -> pleaseLoginMessage
+                    event == "PERMISSION_DENIED" -> rememberedContext.resources.getString(R.string.permission_denied)
                     else -> event
                 }
                 snackbarHostState.showSnackbar(
@@ -93,12 +97,21 @@ fun ProductListScreen(
         }
     }
 
+    // Debug: Log giá trị isAdmin trước khi render Scaffold
+    LaunchedEffect(isAdmin) {
+        android.util.Log.d("ProductListScreen", "Scaffold rendering with isAdmin: $isAdmin")
+    }
+    
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         floatingActionButton = {
+            // Luôn hiển thị FloatingActionButton nếu là admin
             if (isAdmin) {
                 FloatingActionButton(
-                    onClick = { onNavigateToAddEditProduct(null) },
+                    onClick = { 
+                        android.util.Log.d("ProductListScreen", "FAB clicked, navigating to add product, isAdmin: $isAdmin")
+                        onNavigateToAddEditProduct(null) 
+                    },
                     containerColor = PrimaryIndigo,
                     contentColor = Color.White
                 ) {
@@ -106,7 +119,8 @@ fun ProductListScreen(
                 }
             }
         },
-        containerColor = BackgroundLight
+        containerColor = BackgroundLight,
+        contentWindowInsets = WindowInsets(0) // Không dùng padding từ Scaffold, tự xử lý
     ) { padding ->
         Column(
             modifier = Modifier
@@ -126,7 +140,7 @@ fun ProductListScreen(
                 }
                 is ProductListUiState.Success -> {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp), // Giảm padding vertical từ 8dp xuống 4dp
                         verticalAlignment = Alignment.CenterVertically
                     ) {
 
@@ -182,8 +196,8 @@ fun CompactHeader(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .statusBarsPadding()
-            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp), // Padding top để tránh status bar
+            .windowInsetsPadding(WindowInsets.statusBars) // Sử dụng windowInsetsPadding để sát với viền trên
+            .padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 4.dp), // Padding top nhỏ để sát với viền trên
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -192,13 +206,13 @@ fun CompactHeader(
         ) {
             Text(
                 text = stringResource(R.string.dinh_manh_electronics),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.titleLarge, // Giảm từ headlineSmall xuống titleLarge
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
             )
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(40.dp) // Giảm từ 48dp xuống 40dp
                     .clip(CircleShape)
                     .background(HomeColor.copy(alpha = 0.1f))
                     .clickable(onClick = onSupportClick),
@@ -208,34 +222,43 @@ fun CompactHeader(
                     Icons.Default.ContactSupport,
                     contentDescription = "Support",
                     tint = HomeColor,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(20.dp) // Giảm từ 24dp xuống 20dp
                 )
             }
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(8.dp)) // Giảm từ 12dp xuống 8dp
         OutlinedTextField(
             value = searchQuery,
             onValueChange = onSearchChange,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp), 
+            modifier = Modifier.fillMaxWidth(),
             placeholder = {
-                Text(stringResource(R.string.search_at_dinh_manh), fontSize = 14.sp, color = TextLight)
+                Text(
+                    text = stringResource(R.string.search_at_dinh_manh),
+                    fontSize = 14.sp,
+                    color = TextLight
+                )
             },
             leadingIcon = {
-                Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Default.Search,
+                    contentDescription = null,
+                    tint = TextSecondary,
+                    modifier = Modifier.size(20.dp)
+                )
             },
-            shape = RoundedCornerShape(25.dp), 
+            shape = RoundedCornerShape(25.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedBorderColor = BorderLight,
                 focusedBorderColor = PrimaryIndigo,
                 unfocusedContainerColor = BackgroundCard,
                 focusedContainerColor = BackgroundCard,
                 unfocusedTextColor = TextPrimary,
-                focusedTextColor = TextPrimary
+                focusedTextColor = TextPrimary,
+                unfocusedPlaceholderColor = TextLight,
+                focusedPlaceholderColor = TextLight
             ),
             singleLine = true,
-            textStyle = MaterialTheme.typography.bodyMedium
+            textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
         )
     }
 }
@@ -310,8 +333,8 @@ private fun CategoryTabs(
 ) {
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(horizontal = 8.dp), // Giảm từ 12dp xuống 8dp
+        horizontalArrangement = Arrangement.spacedBy(6.dp) // Giảm từ 8dp xuống 6dp
     ) {
         items(categories) { category ->
             val isSelected = category == selectedCategory
@@ -320,7 +343,7 @@ private fun CategoryTabs(
                 onClick = { onCategorySelected(category) },
                 label = {
                     Text(
-                        text = category,
+                        text = getCategoryDisplayName(category), // Dịch category name
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                     )
@@ -333,9 +356,26 @@ private fun CategoryTabs(
                 ),
                 border = BorderStroke(1.dp, if(isSelected) Color.Transparent else BorderLight),
                 shape = RoundedCornerShape(20.dp),
-                modifier = Modifier.height(32.dp)
+                modifier = Modifier.height(28.dp) // Giảm từ 32dp xuống 28dp
             )
         }
+    }
+}
+
+@Composable
+private fun getCategoryDisplayName(category: String): String {
+    return when (category) {
+        "All", "Tất cả" -> stringResource(R.string.category_all)
+        "Điện thoại", "Phone" -> stringResource(R.string.category_phone)
+        "Laptop" -> stringResource(R.string.category_laptop)
+        "Tai nghe", "Headphone" -> stringResource(R.string.category_headphone)
+        "Máy tính bảng", "Tablet" -> stringResource(R.string.category_tablet)
+        "Đồng hồ", "Watch" -> stringResource(R.string.category_watch)
+        "Máy ảnh", "Camera" -> stringResource(R.string.category_camera)
+        "Gaming" -> stringResource(R.string.category_gaming)
+        "Màn hình", "Monitor" -> stringResource(R.string.category_monitor)
+        "Phụ kiện", "Accessory" -> stringResource(R.string.category_accessory)
+        else -> category
     }
 }
 
@@ -390,15 +430,40 @@ fun ProductCard(
                         .align(Alignment.TopEnd)
                         .padding(4.dp)
                 ) {
+                    // Debug: Log giá trị isAdmin trong ProductCard
+                    LaunchedEffect(isAdmin) {
+                        android.util.Log.d("ProductCard", "isAdmin in ProductCard: $isAdmin, product: ${product.name}")
+                    }
+                    
                     if (isAdmin) {
                         Row(
                             modifier = Modifier
-                                .background(Color.White.copy(alpha = 0.9f), RoundedCornerShape(4.dp))
-                                .padding(2.dp),
-                            horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(8.dp))
+                                .padding(4.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = PrimaryIndigo, modifier = Modifier.size(20.dp).clickable { onEdit() })
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = ErrorRed, modifier = Modifier.size(20.dp).clickable { onDelete() })
+                            IconButton(
+                                onClick = onEdit,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit",
+                                    tint = PrimaryIndigo,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                            IconButton(
+                                onClick = onDelete,
+                                modifier = Modifier.size(32.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Delete,
+                                    contentDescription = "Delete",
+                                    tint = ErrorRed,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
                         }
                     } else {
                         Icon(

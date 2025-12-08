@@ -19,5 +19,6 @@ data class OrderEntity(
     val id: String,
     val userId: String,
     val totalAmount: Double,
-    val createdAt: Date
+    val createdAt: Date,
+    val isPaid: Boolean = true // Mặc định là đã thanh toán khi tạo đơn hàng
 )

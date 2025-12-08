@@ -102,14 +102,24 @@ class LoginViewModel @Inject constructor(
                                         if (snapshot.exists()) {
                                             val data = snapshot.data
                                             if (data != null) {
+                                                val isAdminValue = data["isAdmin"]
+                                                val isAdmin = when {
+                                                    isAdminValue is Boolean -> isAdminValue
+                                                    isAdminValue is Number -> isAdminValue.toInt() != 0
+                                                    else -> false
+                                                }
+                                                
+                                                android.util.Log.d("LoginViewModel", "Firestore data - isAdmin raw: $isAdminValue, converted: $isAdmin")
+                                                
                                                 userEntity = com.example.mini_e_shop.data.local.entity.UserEntity(
                                                     id = snapshot.id,
                                                     email = data["email"] as? String ?: email,
                                                     name = data["name"] as? String ?: "",
-                                                    isAdmin = (data["isAdmin"] as? Boolean) ?: false
+                                                    isAdmin = isAdmin
                                                 )
                                                 // Lưu vào Room để đảm bảo đồng bộ
                                                 userRepository.registerUser(userEntity)
+                                                android.util.Log.d("LoginViewModel", "User synced from Firestore to Room. Email: ${userEntity.email}, isAdmin: ${userEntity.isAdmin}")
                                                 println("LoginViewModel: User synced from Firestore to Room. Email: ${userEntity.email}, isAdmin: ${userEntity.isAdmin}")
                                             }
                                         } else {

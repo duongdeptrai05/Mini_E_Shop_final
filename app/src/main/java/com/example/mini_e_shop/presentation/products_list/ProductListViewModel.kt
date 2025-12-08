@@ -106,7 +106,14 @@ class ProductListViewModel @Inject constructor(
 
     fun deleteProduct(product: Product) {
         viewModelScope.launch {
-            productRepository.deleteProduct(product)
+            // Kiểm tra quyền admin trước khi xóa
+            val currentUser = userRepository.getCurrentUser().firstOrNull()
+            if (currentUser?.isAdmin == true) {
+                productRepository.deleteProduct(product)
+            } else {
+                // Gửi thông báo lỗi nếu không phải admin
+                _eventChannel.send("PERMISSION_DENIED")
+            }
         }
     }
 

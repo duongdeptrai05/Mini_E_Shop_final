@@ -28,6 +28,7 @@ fun OrdersScreen(viewModel: OrderViewModel, onBack: () -> Unit) {
     val state by viewModel.orderState.collectAsState()
 
     Scaffold(
+        contentWindowInsets = WindowInsets.statusBars,
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.my_orders), fontWeight = FontWeight.Bold) },
@@ -36,7 +37,8 @@ fun OrdersScreen(viewModel: OrderViewModel, onBack: () -> Unit) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+                windowInsets = WindowInsets.statusBars // Sử dụng statusBars để tự động tính toán padding
             )
         }
     ) { padding ->

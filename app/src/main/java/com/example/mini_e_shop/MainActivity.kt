@@ -146,16 +146,25 @@ class MainActivity : ComponentActivity() {
                                                     route = "${Screen.AddEditProduct.route}?productId={productId}",
                                                     arguments = listOf(
                                                         navArgument("productId") {
-                                                            type = NavType.IntType
-                                                            defaultValue = -1
+                                                            type = NavType.StringType
+                                                            defaultValue = ""
+                                                            nullable = true
                                                         }
                                                     )
                                                 ) {
-                                                    AddEditProductScreen(
-                                                        viewModel = hiltViewModel(),
-                                                        onSave = { navController.popBackStack() },
-                                                        onBack = { navController.popBackStack() }
-                                                    )
+                                                    // Kiểm tra quyền admin trước khi cho phép truy cập
+                                                    if (currentState.isAdmin) {
+                                                        AddEditProductScreen(
+                                                            viewModel = hiltViewModel(),
+                                                            onSave = { navController.popBackStack() },
+                                                            onBack = { navController.popBackStack() }
+                                                        )
+                                                    } else {
+                                                        // Nếu không phải admin, quay lại màn hình trước
+                                                        LaunchedEffect(Unit) {
+                                                            navController.popBackStack()
+                                                        }
+                                                    }
                                                 }
                                                 composable(
                                                     route = "${Screen.ProductDetail.route}/{productId}",

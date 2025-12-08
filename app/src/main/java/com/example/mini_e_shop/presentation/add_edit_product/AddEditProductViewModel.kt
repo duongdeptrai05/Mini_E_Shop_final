@@ -41,13 +41,9 @@ class AddEditProductViewModel @Inject constructor(
     private val _stock = MutableStateFlow("")
     val stock = _stock.asStateFlow()
 //---------------------------------------------------
-// thay thế việc nhập url bằng tải ảnh ln từ thiết bị
-// nhập URL (cũ)
-//    private val _imageUrl = MutableStateFlow("")
-//    val imageUrl = _imageUrl.asStateFlow()
-// tải ảnh từ thiết bị (new)
-    private val _imageUri = MutableStateFlow<Uri?>(null)
-    val imageUri = _imageUri.asStateFlow()
+// Nhập URL ảnh (thay thế việc tải ảnh từ thiết bị)
+    private val _imageUrl = MutableStateFlow("")
+    val imageUrl = _imageUrl.asStateFlow()
 //--------------------------------------------------
     private val _description = MutableStateFlow("")
     val description = _description.asStateFlow()
@@ -56,12 +52,12 @@ class AddEditProductViewModel @Inject constructor(
     val saveEvent = _saveEvent.receiveAsFlow()
 //---------------------------------------------------------------
 
-    // Lấy productId trực tiếp từ savedStateHandle. Nếu không có, mặc định là -1.
-    private var currentProductId: String? = savedStateHandle.get<String>("productId")
+    // Lấy productId trực tiếp từ savedStateHandle. Nếu không có hoặc rỗng, là null (tạo mới).
+    private var currentProductId: String? = savedStateHandle.get<String>("productId")?.takeIf { it.isNotBlank() }
     init {
         // --- Sửa đổi 3: Viết lại toàn bộ khối init ---
-        // Chỉ chạy logic lấy sản phẩm nếu productId không phải là -1 (tức là đang sửa)
-        if (currentProductId != null) {
+        // Chỉ chạy logic lấy sản phẩm nếu productId không null và không rỗng (tức là đang sửa)
+        if (currentProductId != null && currentProductId!!.isNotBlank()) {
             viewModelScope.launch {
                 // Lấy sản phẩm từ repository
                 productRepository.getProductById(currentProductId!!)?.let { product ->
@@ -72,11 +68,7 @@ class AddEditProductViewModel @Inject constructor(
                     _origin.value = product.origin
                     _price.value = product.price.toString()
                     _stock.value = product.stock.toString()
-                    //_imageUrl.value = product.imageUrl // từ code cũ
-                    if (product.imageUrl.isNotEmpty()) {
-                        _imageUri.value = Uri.parse(product.imageUrl)
-                    } // từ code mới
-
+                    _imageUrl.value = product.imageUrl
                     _description.value = product.description
                 }
             }
@@ -101,14 +93,9 @@ class AddEditProductViewModel @Inject constructor(
     fun onStockChange(newStock: String) {
         _stock.value = newStock
     }
-//    fun onImageUrlChange(newUrl: String) {
-//        _imageUrl.value = newUrl
-//    }
-    // code cũ
-    fun onImageUriChange(newUri: Uri?) {
-        _imageUri.value = newUri
+    fun onImageUrlChange(newUrl: String) {
+        _imageUrl.value = newUrl
     }
-    // code mới
     fun onDescriptionChange(newDescription: String) {
         _description.value = newDescription
     }
@@ -116,7 +103,6 @@ class AddEditProductViewModel @Inject constructor(
 fun saveProduct() {
     viewModelScope.launch {
         // --- Sửa đổi 4: Sửa lại logic tạo productToSave ---
-        val imageUrlString = _imageUri.value?.toString() ?: ""
         val productId = currentProductId ?: UUID.randomUUID().toString() // Nếu đang sửa, dùng ID cũ. Nếu tạo mới, tạo ID ngẫu nhiên mới.
 
         val productToSave = Product(
@@ -127,8 +113,7 @@ fun saveProduct() {
             origin = origin.value.trim(),
             price = price.value.toDoubleOrNull() ?: 0.0,
             stock = stock.value.toIntOrNull() ?: 0,
-//            imageUrl = imageUrl.value.trim(), //code cũ
-            imageUrl = imageUrlString, // code mới
+            imageUrl = imageUrl.value.trim(),
             description = description.value.trim()
         )
         // Kiểm tra các trường bắt buộc không được để trống

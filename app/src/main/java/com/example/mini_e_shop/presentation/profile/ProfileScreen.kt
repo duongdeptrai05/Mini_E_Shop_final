@@ -68,7 +68,8 @@ private fun Header(user: UserEntity?) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 60.dp),
+                .statusBarsPadding()
+                .padding(top = 8.dp), // Giảm padding top, statusBarsPadding đã xử lý
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(

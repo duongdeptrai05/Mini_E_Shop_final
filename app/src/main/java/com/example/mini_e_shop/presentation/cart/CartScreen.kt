@@ -62,6 +62,7 @@ fun CartScreen(
         }
     }
     Scaffold(
+        contentWindowInsets = WindowInsets.statusBars,
         topBar = {
             TopAppBar(
                 title = { 
@@ -75,7 +76,7 @@ fun CartScreen(
                     containerColor = CartColor.copy(alpha = 0.05f),
                     titleContentColor = CartColor
                 ),
-//                elevation = TopAppBarDefaults.topAppBarElevation(defaultElevation = 0.dp)
+                windowInsets = WindowInsets.statusBars // Sử dụng statusBars để tự động tính toán padding
             )
         },
         // SỬA: BottomBar giờ đây phức tạp hơn

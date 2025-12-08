@@ -26,7 +26,7 @@ import com.example.mini_e_shop.data.local.dao.FavoriteDao // Thêm import
         OrderItemEntity::class,
         FavoriteEntity::class
     ],
-    version = 8, // Force database recreation
+    version = 9, // Added isPaid field to OrderEntity
     exportSchema = false
 )
 @TypeConverters(Converters::class)

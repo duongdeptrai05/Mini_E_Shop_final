@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import com.example.mini_e_shop.data.preferences.UserPreferencesManager
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @Singleton
 class UserRepositoryImpl @Inject constructor(
@@ -56,20 +57,31 @@ class UserRepositoryImpl @Inject constructor(
                                     // Lấy dữ liệu từ Firestore và convert sang UserEntity
                                     val data = snapshot.data
                                     if (data != null) {
+                                        val isAdminValue = data["isAdmin"]
+                                        val isAdmin = when {
+                                            isAdminValue is Boolean -> isAdminValue
+                                            isAdminValue is Number -> isAdminValue.toInt() != 0
+                                            else -> false
+                                        }
+                                        
+                                        android.util.Log.d("UserRepositoryImpl", "Firestore data - isAdmin raw: $isAdminValue, converted: $isAdmin")
+                                        
                                         val userEntity = UserEntity(
                                             id = snapshot.id,
                                             email = data["email"] as? String ?: "",
                                             name = data["name"] as? String ?: "",
-                                            isAdmin = (data["isAdmin"] as? Boolean) ?: false
+                                            isAdmin = isAdmin
                                         )
                                         
                                         // Cập nhật vào Room (Flow sẽ tự động emit giá trị mới)
                                         repositoryScope.launch {
                                             userDao.insertUser(userEntity)
+                                            android.util.Log.d("UserRepositoryImpl", "User ${userEntity.id} synced from Firestore to Room. Email: ${userEntity.email}, isAdmin: ${userEntity.isAdmin}")
                                             println("User ${userEntity.id} synced from Firestore to Room. isAdmin: ${userEntity.isAdmin}")
                                         }
                                     }
                                 } catch (e: Exception) {
+                                    android.util.Log.e("UserRepositoryImpl", "Error converting Firestore user to UserEntity: $e")
                                     println("Error converting Firestore user to UserEntity: $e")
                                     e.printStackTrace()
                                 }
@@ -93,30 +105,111 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override fun observeUserById(userId: String): Flow<UserEntity?> {
+        // Force refresh từ Firestore trước khi observe từ Room
+        repositoryScope.launch {
+            try {
+                android.util.Log.d("UserRepositoryImpl", "observeUserById - Starting force refresh for userId: $userId")
+                
+                // Lấy từ Room trước để so sánh
+                val roomUser = userDao.getUserById(userId)
+                android.util.Log.d("UserRepositoryImpl", "observeUserById - Room user: ${roomUser?.email}, isAdmin: ${roomUser?.isAdmin}")
+                
+                // Lấy từ Firestore
+                val snapshot = firestore.collection("users").document(userId).get().await()
+                if (snapshot.exists()) {
+                    val data = snapshot.data
+                    if (data != null) {
+                        val isAdminValue = data["isAdmin"]
+                        val isAdmin = when {
+                            isAdminValue is Boolean -> isAdminValue
+                            isAdminValue is Number -> isAdminValue.toInt() != 0
+                            else -> false
+                        }
+                        
+                        android.util.Log.d("UserRepositoryImpl", "observeUserById - Firestore data - isAdmin raw: $isAdminValue, converted: $isAdmin")
+                        
+                        val userEntity = UserEntity(
+                            id = snapshot.id,
+                            email = data["email"] as? String ?: "",
+                            name = data["name"] as? String ?: "",
+                            isAdmin = isAdmin
+                        )
+                        
+                        // Nếu Firestore có isAdmin = true nhưng Room có isAdmin = false, hoặc ngược lại, cập nhật Room
+                        if (roomUser == null || roomUser.isAdmin != userEntity.isAdmin) {
+                            android.util.Log.d("UserRepositoryImpl", "observeUserById - Updating Room with Firestore data. Room isAdmin: ${roomUser?.isAdmin}, Firestore isAdmin: ${userEntity.isAdmin}")
+                            userDao.insertUser(userEntity)
+                            android.util.Log.d("UserRepositoryImpl", "observeUserById - User synced to Room. Email: ${userEntity.email}, isAdmin: ${userEntity.isAdmin}")
+                        } else {
+                            android.util.Log.d("UserRepositoryImpl", "observeUserById - Room and Firestore are in sync. isAdmin: ${userEntity.isAdmin}")
+                        }
+                    } else {
+                        android.util.Log.w("UserRepositoryImpl", "observeUserById - Firestore snapshot exists but data is null")
+                    }
+                } else {
+                    android.util.Log.w("UserRepositoryImpl", "observeUserById - Firestore document does not exist for userId: $userId")
+                    // Nếu Firestore không có nhưng Room có, sync lên Firestore
+                    if (roomUser != null) {
+                        android.util.Log.d("UserRepositoryImpl", "observeUserById - Syncing Room user to Firestore. isAdmin: ${roomUser.isAdmin}")
+                        val userMap = hashMapOf(
+                            "email" to roomUser.email,
+                            "name" to roomUser.name,
+                            "isAdmin" to roomUser.isAdmin
+                        )
+                        firestore.collection("users").document(userId)
+                            .set(userMap)
+                            .addOnSuccessListener {
+                                android.util.Log.d("UserRepositoryImpl", "observeUserById - Room user synced to Firestore. isAdmin: ${roomUser.isAdmin}")
+                            }
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("UserRepositoryImpl", "observeUserById - Error refreshing from Firestore: $e", e)
+            }
+        }
+        
         return userDao.observeUserById(userId)
     }
 
     override suspend fun registerUser(user: UserEntity) {
+        android.util.Log.d("UserRepositoryImpl", "registerUser - User: ${user.email}, isAdmin: ${user.isAdmin}")
         userDao.insertUser(user)
-        // Đồng bộ lên Firestore
+        // Đồng bộ lên Firestore - sử dụng Map thay vì Entity để đảm bảo isAdmin được lưu đúng
+        val userMap = hashMapOf(
+            "email" to user.email,
+            "name" to user.name,
+            "isAdmin" to user.isAdmin
+        )
         firestore.collection("users").document(user.id)
-            .set(user)
+            .set(userMap)
+            .addOnSuccessListener {
+                android.util.Log.d("UserRepositoryImpl", "User ${user.id} synced to Firestore. isAdmin: ${user.isAdmin}")
+            }
             .addOnFailureListener { e ->
+                android.util.Log.e("UserRepositoryImpl", "Error syncing user to Firestore: $e")
                 println("Error syncing user to Firestore: $e")
             }
     }
     
     override suspend fun updateUser(user: UserEntity) {
+        android.util.Log.d("UserRepositoryImpl", "updateUser - User: ${user.email}, isAdmin: ${user.isAdmin}")
         // Cập nhật vào Room trước (Flow sẽ tự động emit giá trị mới)
         userDao.insertUser(user) // Sử dụng insertUser với REPLACE để update
         
-        // Sau đó cập nhật lên Firestore
+        // Sau đó cập nhật lên Firestore - sử dụng Map thay vì Entity
+        val userMap = hashMapOf(
+            "email" to user.email,
+            "name" to user.name,
+            "isAdmin" to user.isAdmin
+        )
         firestore.collection("users").document(user.id)
-            .set(user)
+            .set(userMap)
             .addOnSuccessListener {
+                android.util.Log.d("UserRepositoryImpl", "User ${user.id} updated successfully in Firestore. isAdmin: ${user.isAdmin}")
                 println("User ${user.id} updated successfully in Firestore.")
             }
             .addOnFailureListener { e ->
+                android.util.Log.e("UserRepositoryImpl", "Error updating user in Firestore: $e")
                 println("Error updating user in Firestore: $e")
             }
     }
@@ -124,7 +217,31 @@ class UserRepositoryImpl @Inject constructor(
     override fun getCurrentUser(): Flow<UserEntity?> {
         return preferencesManager.authPreferencesFlow.flatMapLatest { prefs ->
             if (prefs.isLoggedIn && prefs.loggedInUserId.isNotEmpty()){
-                userDao.observeUserById(prefs.loggedInUserId)
+                val userId = prefs.loggedInUserId
+                android.util.Log.d("UserRepositoryImpl", "getCurrentUser - userId: $userId")
+                
+                // Force sync từ Room lên Firestore nếu Room có isAdmin = true
+                repositoryScope.launch {
+                    val roomUser = userDao.getUserById(userId)
+                    if (roomUser != null && roomUser.isAdmin) {
+                        android.util.Log.d("UserRepositoryImpl", "getCurrentUser - Room user has isAdmin = true, syncing to Firestore")
+                        val userMap = hashMapOf(
+                            "email" to roomUser.email,
+                            "name" to roomUser.name,
+                            "isAdmin" to roomUser.isAdmin
+                        )
+                        firestore.collection("users").document(userId)
+                            .set(userMap)
+                            .addOnSuccessListener {
+                                android.util.Log.d("UserRepositoryImpl", "getCurrentUser - Room user synced to Firestore. isAdmin: ${roomUser.isAdmin}")
+                            }
+                            .addOnFailureListener { e ->
+                                android.util.Log.e("UserRepositoryImpl", "getCurrentUser - Error syncing to Firestore: $e")
+                            }
+                    }
+                }
+                
+                userDao.observeUserById(userId)
             } else {
                 flowOf(null)
             }

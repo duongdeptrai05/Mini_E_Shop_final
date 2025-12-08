@@ -28,15 +28,17 @@ class OrderRepositoryImpl @Inject constructor(
 
     override fun getOrdersForUser(userId: String): Flow<List<Order>> {
         return orderDao.getOrdersByUser(userId).map { entities ->
-            entities.map { entity ->
-                Order(
-                    id = entity.id,
-                    userId = entity.userId,
-                    totalAmount = entity.totalAmount,
-                    // Chuyển đổi Date sang String để khớp với model 'Order'
-                    createdAt = entity.createdAt.toString()
-                )
-            }
+            entities
+                .filter { it.isPaid } // Chỉ lấy các đơn hàng đã thanh toán
+                .map { entity ->
+                    Order(
+                        id = entity.id,
+                        userId = entity.userId,
+                        totalAmount = entity.totalAmount,
+                        // Chuyển đổi Date sang String để khớp với model 'Order'
+                        createdAt = entity.createdAt.toString()
+                    )
+                }
         }
     }
 
@@ -51,7 +53,8 @@ class OrderRepositoryImpl @Inject constructor(
             id = newOrderId,
             userId = userId,
             totalAmount = totalAmount,
-            createdAt = Date()
+            createdAt = Date(),
+            isPaid = true // Đơn hàng được tạo khi checkout nên mặc định đã thanh toán
         )
         val orderItemEntities = cartItems.map {
             OrderItemEntity(

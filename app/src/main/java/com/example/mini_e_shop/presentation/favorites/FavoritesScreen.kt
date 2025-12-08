@@ -29,6 +29,7 @@ fun FavoritesScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
+        contentWindowInsets = WindowInsets.statusBars,
         topBar = {
             TopAppBar(
                 title = { 
@@ -41,7 +42,8 @@ fun FavoritesScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = FavoritesColor.copy(alpha = 0.05f),
                     titleContentColor = FavoritesColor
-                )
+                ),
+                windowInsets = WindowInsets.statusBars // Sử dụng statusBars để tự động tính toán padding
             )
         },
         containerColor = BackgroundLight
