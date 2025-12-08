@@ -19,7 +19,8 @@ enum class SortType {
     NONE, // Mặc định
     PRICE_ASC, // Giá tăng dần
     PRICE_DESC, // Giá giảm dần
-    NAME_ASC // Tên A-Z
+    NAME_ASC, // Tên A-Z
+    NAME_DESC // Tên Z-A
 }
 
 @OptIn(FlowPreview::class)
@@ -83,6 +84,7 @@ class ProductListViewModel @Inject constructor(
             SortType.PRICE_ASC -> categorizedProducts.sortedBy { it.price }
             SortType.PRICE_DESC -> categorizedProducts.sortedByDescending { it.price }
             SortType.NAME_ASC -> categorizedProducts.sortedBy { it.name }
+            SortType.NAME_DESC -> categorizedProducts.sortedByDescending { it.name }
             SortType.NONE -> categorizedProducts // Không sắp xếp
         }
 
@@ -115,15 +117,15 @@ class ProductListViewModel @Inject constructor(
                     // Check if the product is in stock
                     if (product.stock > 0) {
                         cartRepository.addProductToCart(product, user.id)
-                        // Gửi thông báo thành công qua Channel
-                        _eventChannel.send("Đã thêm '${product.name}' vào giỏ hàng")
+                        // Gửi thông báo thành công qua Channel với format có thể dịch được
+                        _eventChannel.send("ADD_TO_CART_SUCCESS:${product.name}")
                     } else {
-                        _eventChannel.send("Sản phẩm đã hết hàng")
+                        _eventChannel.send("PRODUCT_OUT_OF_STOCK")
                     }
                 } catch (e: Exception) {
-                    _eventChannel.send("Lỗi: Không thể thêm vào giỏ hàng")
+                    _eventChannel.send("ADD_TO_CART_ERROR")
                 }
-            } ?: _eventChannel.send("Vui lòng đăng nhập để thực hiện")
+            } ?: _eventChannel.send("PLEASE_LOGIN")
         }
     }
     fun toggleFavorite(product: Product) {
@@ -134,16 +136,16 @@ class ProductListViewModel @Inject constructor(
                     val isCurrentlyFavorite = favoriteRepository.getFavoriteProductIds(user.id).first().contains(product.id)
                     favoriteRepository.toggleFavorite(productId = product.id, userId = user.id)
 
-                    // Gửi thông báo tương ứng
+                    // Gửi thông báo tương ứng với format có thể dịch được
                     if (isCurrentlyFavorite) {
-                        _eventChannel.send("Đã xóa '${product.name}' khỏi danh sách yêu thích")
+                        _eventChannel.send("REMOVE_FROM_FAVORITES_SUCCESS:${product.name}")
                     } else {
-                        _eventChannel.send("Đã thêm '${product.name}' vào danh sách yêu thích")
+                        _eventChannel.send("ADD_TO_FAVORITES_SUCCESS:${product.name}")
                     }
                 } catch (e: Exception) {
-                    _eventChannel.send("Lỗi: Thao tác thất bại")
+                    _eventChannel.send("FAVORITE_ACTION_ERROR")
                 }
-            } ?: _eventChannel.send("Vui lòng đăng nhập để thực hiện")
+            } ?: _eventChannel.send("PLEASE_LOGIN")
         }
     }
     fun onSortTypeSelected(sortType: SortType) {

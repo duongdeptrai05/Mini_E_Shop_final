@@ -16,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,9 +40,10 @@ fun BottomNavigationBar(navController: NavController) {
     NavigationBar(
         containerColor = Color.White,
         tonalElevation = 8.dp,
+        windowInsets = WindowInsets(0), // tránh bị khuyết do inset mặc định
         modifier = Modifier
-            .height(70.dp)
-            .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))
+            .height(72.dp) // cao hơn 1 chút để đủ không gian icon + nhãn
+            .fillMaxWidth()
     ) {
         items.forEach { screen ->
             val isSelected = currentRoute == screen.route
@@ -50,7 +52,7 @@ fun BottomNavigationBar(navController: NavController) {
                 animationSpec = tween(durationMillis = 200),
                 label = "scale"
             )
-            
+
             // Màu sắc riêng cho từng trang
             val pageColor = when (screen.route) {
                 Screen.Home.route -> HomeColor
@@ -59,7 +61,7 @@ fun BottomNavigationBar(navController: NavController) {
                 Screen.Profile.route -> ProfileColor
                 else -> PrimaryIndigo
             }
-            
+
             val pageColorLight = when (screen.route) {
                 Screen.Home.route -> HomeColorLight
                 Screen.Favorites.route -> FavoritesColorLight
@@ -81,7 +83,7 @@ fun BottomNavigationBar(navController: NavController) {
                     ) {
                         Icon(
                             imageVector = screen.icon!!,
-                            contentDescription = screen.title,
+                            contentDescription = screen.title?.let { stringResource(it) },
                             modifier = Modifier
                                 .scale(scale)
                                 .size(22.dp),
@@ -91,7 +93,7 @@ fun BottomNavigationBar(navController: NavController) {
                 },
                 label = {
                     Text(
-                        text = screen.title!!,
+                        text = stringResource(screen.title!!),
                         fontSize = 11.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
                         color = if (isSelected) pageColor else TextSecondary

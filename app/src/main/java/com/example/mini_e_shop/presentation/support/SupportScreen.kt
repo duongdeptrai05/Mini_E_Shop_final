@@ -7,10 +7,13 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,14 +27,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mini_e_shop.R
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
-// Dummy data class for chat messages
-data class Message(val text: String, val isFromUser: Boolean, val showAvatar: Boolean)
+// Updated data class to support string resources
+data class Message(
+    val text: String? = null,
+    @StringRes val textResId: Int? = null,
+    val isFromUser: Boolean,
+    val showAvatar: Boolean
+) {
+    init {
+        require(text != null || textResId != null) { "Either text or textResId must be provided" }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,46 +59,49 @@ fun SupportScreen(
     var messageText by remember { mutableStateOf("") }
     val messages = remember {
         mutableStateListOf(
-            Message("Xin chào! Shop có thể giúp gì cho bạn?", isFromUser = false, showAvatar = true),
+            Message(textResId = R.string.support_greeting, isFromUser = false, showAvatar = true),
         )
     }
     val context = LocalContext.current
+    val rememberedContext = remember { context }
+    var showEmojiPicker by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
-    // Launcher để chụp ảnh. Kết quả trả về là một Bitmap.
+    // Launcher to take a picture. The result is a Bitmap.
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap: Bitmap? ->
         if (bitmap != null) {
-            // TODO: Xử lý ảnh bitmap (ví dụ: hiển thị trong chat, tải lên server)
-            Toast.makeText(context, "Đã chụp ảnh!", Toast.LENGTH_SHORT).show()
+            // TODO: Handle the bitmap image (e.g., display in chat, upload to server)
+            Toast.makeText(rememberedContext, rememberedContext.getString(R.string.support_photo_taken), Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Launcher để yêu cầu quyền.
+    // Launcher to request permission.
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            // Quyền đã được cấp, khởi chạy camera
+            // Permission is granted, launch the camera
             cameraLauncher.launch()
         } else {
-            // Quyền bị từ chối
-            Toast.makeText(context, "Quyền truy cập camera bị từ chối.", Toast.LENGTH_SHORT).show()
+            // Permission denied
+            Toast.makeText(rememberedContext, rememberedContext.getString(R.string.support_camera_permission_denied), Toast.LENGTH_SHORT).show()
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Chăm sóc khách hàng", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(id = R.string.support_chat_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 },
                 actions = {
                     IconButton(onClick = onNavigateToContact) {
-                        Icon(Icons.Default.SupportAgent, contentDescription = "Contact")
+                        Icon(Icons.Default.SupportAgent, contentDescription = stringResource(id = R.string.support_contact_icon))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -92,48 +111,74 @@ fun SupportScreen(
                     navigationIconContentColor = Color.White
                 )
             )
-        },
-        bottomBar = {
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            LazyColumn(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(Color(0xFFE5F3FF))
+                    .padding(horizontal = 16.dp),
+                reverseLayout = true
+            ) {
+                items(messages.reversed()) {
+                    MessageBubble(message = it)
+                }
+            }
+
+            if (showEmojiPicker) {
+                EmojiPicker {
+                    messageText += it
+                }
+            }
+
             MessageInputBar(
                 messageText = messageText,
                 onMessageChange = { messageText = it },
                 onSendClick = {
                     if (messageText.isNotBlank()) {
-                        messages.add(Message(messageText, isFromUser = true, showAvatar = false))
+                        messages.add(Message(text = messageText, isFromUser = true, showAvatar = false))
                         messageText = ""
-                        // TODO: Add bot response logic here
+                        scope.launch {
+                            delay(1000) // Add a 1-second delay
+                            messages.add(Message(textResId = R.string.support_feature_in_development, isFromUser = false, showAvatar = true))
+                        }
                     }
                 },
                 onCameraClick = {
-                    // Kiểm tra quyền trước khi khởi chạy camera
                     when (PackageManager.PERMISSION_GRANTED) {
-                        ContextCompat.checkSelfPermission(
-                            context,
-                            Manifest.permission.CAMERA
-                        ) -> {
-                            // Quyền đã có, khởi chạy camera
-                            cameraLauncher.launch()
-                        }
-                        else -> {
-                            // Yêu cầu quyền
-                            permissionLauncher.launch(Manifest.permission.CAMERA)
-                        }
+                        ContextCompat.checkSelfPermission(rememberedContext, Manifest.permission.CAMERA) -> cameraLauncher.launch()
+                        else -> permissionLauncher.launch(Manifest.permission.CAMERA)
                     }
-                }
+                },
+                onEmojiClick = { showEmojiPicker = !showEmojiPicker }
             )
         }
+    }
+}
+
+@Composable
+fun EmojiPicker(onEmojiSelected: (String) -> Unit) {
+    val emojis = listOf("😊", "😂", "❤️", "👍", "🤔", "🙏", "🎉", "😍", "😢", "😡")
+    LazyRow(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFE5F3FF))
-                .padding(it)
-                .padding(horizontal = 16.dp),
-            reverseLayout = true
-        ) {
-            items(messages.reversed()) {
-                MessageBubble(message = it)
-            }
+        items(emojis) {
+            Text(
+                text = it,
+                fontSize = 24.sp,
+                modifier = Modifier
+                    .clickable { onEmojiSelected(it) }
+                    .padding(horizontal = 8.dp)
+            )
         }
     }
 }
@@ -148,8 +193,8 @@ fun MessageBubble(message: Message) {
     ) {
         if (!message.isFromUser && message.showAvatar) {
             Image(
-                imageVector = Icons.Default.Person, // Using a vector asset
-                contentDescription = "Avatar",
+                imageVector = Icons.Default.Person,
+                contentDescription = stringResource(id = R.string.support_avatar),
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
@@ -158,7 +203,7 @@ fun MessageBubble(message: Message) {
             )
             Spacer(modifier = Modifier.width(8.dp))
         } else if (!message.isFromUser) {
-            Spacer(modifier = Modifier.width(48.dp)) // Spacer to align messages
+            Spacer(modifier = Modifier.width(48.dp))
         }
 
         Box(
@@ -170,8 +215,9 @@ fun MessageBubble(message: Message) {
                 .padding(12.dp)
                 .weight(1f, fill = false)
         ) {
+            val messageText = message.text ?: stringResource(id = message.textResId!!)
             Text(
-                text = message.text,
+                text = messageText,
                 color = if (message.isFromUser) Color.White else Color.Black
             )
         }
@@ -185,9 +231,9 @@ fun MessageInputBar(
     messageText: String,
     onMessageChange: (String) -> Unit,
     onSendClick: () -> Unit,
-    onCameraClick: () -> Unit
+    onCameraClick: () -> Unit,
+    onEmojiClick: () -> Unit
 ) {
-    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -195,18 +241,18 @@ fun MessageInputBar(
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = { Toast.makeText(context, "Chức năng gửi emoji sắp ra mắt!", Toast.LENGTH_SHORT).show() }) {
-            Icon(Icons.Outlined.SentimentSatisfied, contentDescription = "Emoji", tint = Color.Gray)
+        IconButton(onClick = onEmojiClick) {
+            Icon(Icons.Outlined.SentimentSatisfied, contentDescription = stringResource(id = R.string.support_emoji_icon), tint = Color.Gray)
         }
         IconButton(onClick = onCameraClick) {
-            Icon(Icons.Default.CameraAlt, contentDescription = "Attach image", tint = Color.Gray)
+            Icon(Icons.Default.CameraAlt, contentDescription = stringResource(id = R.string.support_attach_image_icon), tint = Color.Gray)
         }
 
         TextField(
             value = messageText,
             onValueChange = onMessageChange,
             modifier = Modifier.weight(1f),
-            placeholder = { Text("Nhập tin nhắn...") },
+            placeholder = { Text(stringResource(id = R.string.support_message_placeholder)) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
@@ -218,7 +264,7 @@ fun MessageInputBar(
         )
 
         IconButton(onClick = onSendClick) {
-            Icon(Icons.Default.Send, contentDescription = "Send", tint = Color(0xFF007AFF))
+            Icon(Icons.Default.Send, contentDescription = stringResource(id = R.string.support_send_icon), tint = Color(0xFF007AFF))
         }
     }
 }

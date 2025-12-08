@@ -10,10 +10,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mini_e_shop.R
 import com.example.mini_e_shop.presentation.products_list.ProductCard
 import com.example.mini_e_shop.ui.theme.*
 
@@ -31,7 +33,7 @@ fun FavoritesScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "Sản phẩm yêu thích",
+                        stringResource(id = R.string.favorite_products),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     ) 
@@ -65,7 +67,7 @@ fun FavoritesScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = "Bạn chưa có sản phẩm yêu thích nào.",
+                                text = stringResource(id = R.string.no_favorite_products),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = TextSecondary,
                                 textAlign = TextAlign.Center

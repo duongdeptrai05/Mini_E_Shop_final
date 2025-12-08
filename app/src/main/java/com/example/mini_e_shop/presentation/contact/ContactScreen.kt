@@ -1,6 +1,7 @@
 package com.example.mini_e_shop.presentation.contact
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -32,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -39,12 +41,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mini_e_shop.R
 
 // Dummy data for contacts
-data class Contact(val name: String, val title: String, @DrawableRes val imageResId: Int)
+data class Contact(val name: String, @StringRes val titleResId: Int, @DrawableRes val imageResId: Int)
 
-val dummyContacts = listOf(
-    Contact("Trương Duy Mạnh", "Ngồi nhìn không biết làm gì", R.drawable.avt_duym),
-    Contact("Bùi Đức Dương", "Hỗ trợ kỹ thuật", R.drawable.avt_duong),
-    Contact("Trần Đình Mạnh", "Quản lý đơn hàng", R.drawable.avt_dinhm)
+fun dummyContacts(): List<Contact> = listOf(
+    Contact("Trương Duy Mạnh", R.string.contact_consultant_title, R.drawable.avt_duym),
+    Contact("Bùi Đức Dương", R.string.contact_technical_support_title, R.drawable.avt_duong),
+    Contact("Trần Đình Mạnh", R.string.contact_order_manager_title, R.drawable.avt_dinhm)
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,10 +58,10 @@ fun ContactScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Nhân viên hỗ trợ", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.contact_screen_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -75,7 +77,7 @@ fun ContactScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            items(dummyContacts) { contact ->
+            items(dummyContacts()) { contact ->
                 ContactItem(contact = contact)
                 Divider()
             }
@@ -93,7 +95,7 @@ fun ContactItem(contact: Contact) {
     ) {
         Image(
             painter = painterResource(id = contact.imageResId),
-            contentDescription = "Avatar",
+            contentDescription = stringResource(R.string.contact_avatar_description),
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(60.dp)
@@ -103,7 +105,7 @@ fun ContactItem(contact: Contact) {
         Column {
             Text(text = contact.name, fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = contact.title, color = Color.Gray, fontSize = 15.sp)
+            Text(text = stringResource(contact.titleResId), color = Color.Gray, fontSize = 15.sp)
         }
     }
 }

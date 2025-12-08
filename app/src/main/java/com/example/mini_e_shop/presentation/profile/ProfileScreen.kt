@@ -8,7 +8,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ReceiptLong
@@ -21,9 +20,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mini_e_shop.R
 import com.example.mini_e_shop.data.local.entity.UserEntity
 import com.example.mini_e_shop.ui.theme.*
 
@@ -71,7 +72,7 @@ private fun Header(user: UserEntity?) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                "Tài khoản",
+                stringResource(id = R.string.account),
                 style = MaterialTheme.typography.headlineMedium,
                 color = Color.White,
                 fontWeight = FontWeight.Bold
@@ -133,9 +134,9 @@ private fun Menu(
     onNavigateToFavorites: () -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        MenuButton(text = "Đơn hàng của tôi", icon = Icons.Default.ReceiptLong, onClick = onNavigateToOrders)
-        MenuButton(text = "Lịch sử mua hàng", icon = Icons.Default.History, onClick = onNavigateToFavorites)
-        MenuButton(text = "Cài đặt", icon = Icons.Default.Settings, onClick = onNavigateToSettings)
+        MenuButton(text = stringResource(id = R.string.my_orders), icon = Icons.Default.ReceiptLong, onClick = onNavigateToOrders)
+        MenuButton(text = stringResource(id = R.string.purchase_history), icon = Icons.Default.History, onClick = onNavigateToFavorites)
+        MenuButton(text = stringResource(id = R.string.settings), icon = Icons.Default.Settings, onClick = onNavigateToSettings)
     }
 }
 
@@ -143,9 +144,9 @@ private fun Menu(
 private fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
     // Màu sắc riêng cho từng menu item
     val iconColor = when (text) {
-        "Đơn hàng của tôi" -> CartColor
-        "Lịch sử mua hàng" -> PrimaryIndigo
-        "Cài đặt" -> PrimaryIndigo
+        stringResource(id = R.string.my_orders) -> CartColor
+        stringResource(id = R.string.purchase_history) -> PrimaryIndigo
+        stringResource(id = R.string.settings) -> PrimaryIndigo
         else -> ProfileColor
     }
     
@@ -223,7 +224,7 @@ private fun LogoutButton(onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                "Đăng xuất",
+                stringResource(id = R.string.logout),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
             )

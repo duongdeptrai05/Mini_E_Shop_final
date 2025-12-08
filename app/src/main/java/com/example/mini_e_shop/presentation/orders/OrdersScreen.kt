@@ -14,9 +14,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.mini_e_shop.R
 import com.example.mini_e_shop.domain.model.Order
 import com.example.mini_e_shop.ui.theme.PrimaryBlue
 
@@ -28,10 +30,10 @@ fun OrdersScreen(viewModel: OrderViewModel, onBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Đơn hàng của tôi", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.my_orders), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
@@ -49,7 +51,7 @@ fun OrdersScreen(viewModel: OrderViewModel, onBack: () -> Unit) {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is OrderUiState.Empty -> {
-                    Text("Bạn chưa có đơn hàng nào.", modifier = Modifier.align(Alignment.Center))
+                    Text(stringResource(R.string.no_orders), modifier = Modifier.align(Alignment.Center))
                 }
                 is OrderUiState.Success -> {
                     LazyColumn(
@@ -76,11 +78,11 @@ fun OrderRow(order: Order) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Text("Đơn hàng #${order.id}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(stringResource(R.string.order_number, order.id), fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Text(order.createdAt, color = Color.Gray, fontSize = 12.sp)
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Text("Tổng cộng: $${String.format("%.2f", order.totalAmount)}", color = PrimaryBlue, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+            Text(stringResource(R.string.order_total, order.totalAmount), color = PrimaryBlue, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
         }
     }
 }

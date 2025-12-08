@@ -1,5 +1,6 @@
 package com.example.mini_e_shop.data.repository
 
+import com.example.mini_e_shop.data.local.SampleData
 import com.example.mini_e_shop.data.local.dao.ProductDao
 import com.example.mini_e_shop.data.local.entity.ProductEntity
 import com.example.mini_e_shop.domain.model.Product
@@ -82,7 +83,7 @@ class ProductRepositoryImpl @Inject constructor(
     override suspend fun upsertProduct(product: Product) {
         // Lưu vào Room database trước
         productDao.upsertProduct(product.toEntity())
-        
+
         // Sau đó lưu lên Firebase
         val productData = hashMapOf(
             "name" to product.name,
@@ -94,7 +95,7 @@ class ProductRepositoryImpl @Inject constructor(
             "imageUrl" to product.imageUrl,
             "description" to product.description
         )
-        
+
         firestore.collection("products")
             .document(product.id)
             .set(productData, com.google.firebase.firestore.SetOptions.merge())
@@ -109,7 +110,7 @@ class ProductRepositoryImpl @Inject constructor(
     override suspend fun deleteProduct(product: Product) {
         // Xóa khỏi Room database trước
         productDao.deleteProduct(product.toEntity())
-        
+
         // Sau đó xóa khỏi Firebase
         firestore.collection("products")
             .document(product.id)

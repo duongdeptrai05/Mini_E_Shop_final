@@ -19,11 +19,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.mini_e_shop.R
 import com.example.mini_e_shop.domain.model.CartItem
 import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.ui.theme.*
@@ -64,7 +66,7 @@ fun CartScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        "Giỏ hàng của bạn",
+                        stringResource(R.string.cart_title),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     ) 
@@ -104,7 +106,7 @@ fun CartScreen(
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 is CartUiState.Empty -> {
-                    Text("Giỏ hàng của bạn đang trống.", modifier = Modifier.align(Alignment.Center))
+                    Text(stringResource(R.string.cart_empty), modifier = Modifier.align(Alignment.Center))
                 }
                 is CartUiState.Success -> {
                     LazyColumn(
@@ -195,11 +197,11 @@ fun CartItemRow(
 fun QuantitySelector(item: CartItem, onQuantityChange: (Int) -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { onQuantityChange(item.quantity - 1) }) {
-            Icon(if (item.quantity == 1) Icons.Default.Delete else Icons.Default.Remove, contentDescription = "Remove")
+            Icon(if (item.quantity == 1) Icons.Default.Delete else Icons.Default.Remove, contentDescription = stringResource(R.string.cart_remove_item))
         }
         Text("${item.quantity}", fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 8.dp))
         IconButton(onClick = { onQuantityChange(item.quantity + 1) }) {
-            Icon(Icons.Default.Add, contentDescription = "Add")
+            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.cart_add_item))
         }
     }
 }
@@ -233,11 +235,11 @@ private fun CheckoutBar(
                         checked = isAllSelected,
                         onCheckedChange = onSelectAll
                     )
-                    Text("Tất cả")
+                    Text(stringResource(R.string.cart_select_all))
                 }
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        "Tổng thanh toán",
+                        stringResource(R.string.cart_total_payment),
                         style = MaterialTheme.typography.bodyMedium,
                         color = TextSecondary
                     )
@@ -270,12 +272,12 @@ private fun CheckoutBar(
             ) {
                 Icon(
                     Icons.Default.ShoppingCartCheckout,
-                    contentDescription = "Checkout",
+                    contentDescription = stringResource(R.string.cart_checkout),
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    "Mua hàng ($selectedItemsCount)",
+                    stringResource(R.string.cart_buy_now, selectedItemsCount),
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Bold
                 )
