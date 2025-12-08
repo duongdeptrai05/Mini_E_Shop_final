@@ -25,9 +25,9 @@ import androidx.room.PrimaryKey
 data class OrderItemEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Int = 0,
-    val orderId: Int,
-    val productId: Int, // Sửa lại thành productId kiểu Int
+    val orderId: String,
+    val productId: String,
     val quantity: Int,
-    val price: Double // Sửa lại thành price cho nhất quán
+    val price: Double
 )
 

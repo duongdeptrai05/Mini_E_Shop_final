@@ -7,9 +7,9 @@ fun UserEntity.toUser(): User {
     return User(
         id = this.id,
         email = this.email,
-        passwordHash = this.passwordHash,
+
         name = this.name,
-        role = this.role
+        isAdmin = this.isAdmin
     )
 }
 
@@ -17,8 +17,8 @@ fun User.toUserEntity(): UserEntity {
     return UserEntity(
         id = this.id,
         email = this.email,
-        passwordHash = this.passwordHash,
+
         name = this.name,
-        role = this.role
+        isAdmin = this.isAdmin
     )
 }

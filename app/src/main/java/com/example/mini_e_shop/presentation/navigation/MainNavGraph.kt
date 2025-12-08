@@ -15,16 +15,15 @@ import com.example.mini_e_shop.presentation.profile.ProfileScreen
 @Composable
 fun MainNavGraph(
     modifier: Modifier = Modifier,
-    mainNavController: NavHostController, // NavController chính
-     // Để điều hướng ra các màn hình ngoài (Checkout, Detail...)
-    bottomNavController: NavHostController, // Để điều hướng giữa các tab
+    mainNavController: NavHostController,
+    bottomNavController: NavHostController,
     isAdmin: Boolean,
     currentUser: UserEntity?,
     onNavigateToOrders: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onLogout: () -> Unit,
-    onNavigateToAddEditProduct: (Int?) -> Unit,
-    onProductClick: (Int) -> Unit,
+    onNavigateToAddEditProduct: (String?) -> Unit,
+    onProductClick: (String) -> Unit,
     onNavigateToSupport: () -> Unit,
     onNavigateToCheckout: (String) -> Unit
 ) {

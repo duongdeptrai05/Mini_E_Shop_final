@@ -4,7 +4,9 @@ import com.example.mini_e_shop.domain.model.Product
 import kotlinx.coroutines.flow.Flow
 
 interface FavoriteRepository {
-    fun getFavoriteProductIds(userId: Int): Flow<Set<Int>>
-    suspend fun toggleFavorite(productId: Int, userId: Int)
-    fun getFavoriteProducts(userId: Int): Flow<List<Product>>
+    fun getFavoriteProductIds(userId: String): Flow<Set<String>>
+    suspend fun toggleFavorite(productId: String, userId: String)
+    fun getFavoriteProducts(userId: String): Flow<List<Product>>
+
+    fun isFavorite(productId: String, userId: String): Flow<Boolean>
 }

@@ -105,8 +105,8 @@ class MainActivity : ComponentActivity() {
                                                 route = "${Screen.AddEditProduct.route}?productId={productId}",
                                                 arguments = listOf(
                                                     navArgument("productId") {
-                                                        type = NavType.IntType
-                                                        defaultValue = -1
+                                                        type = NavType.StringType
+                                                        defaultValue = ""
                                                     }
                                                 )
                                             ) {
@@ -118,7 +118,7 @@ class MainActivity : ComponentActivity() {
                                             }
                                             composable(
                                                 route = "${Screen.ProductDetail.route}/{productId}",
-                                                arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                                                arguments = listOf(navArgument("productId") { type = NavType.StringType })
                                             ) {
                                                 ProductDetailScreen(
                                                     onBack = { navController.popBackStack() }
@@ -167,7 +167,7 @@ class MainActivity : ComponentActivity() {
                                         LoginScreen(
                                             viewModel = hiltViewModel(),
                                             onLoginSuccess = {
-                                                authViewModel.onLoginSuccess(it)
+//                                                authViewModel.onLoginSuccess(it)
                                             },
                                             onNavigateToRegister = { navController.navigate(Screen.Register.route) }
                                         )

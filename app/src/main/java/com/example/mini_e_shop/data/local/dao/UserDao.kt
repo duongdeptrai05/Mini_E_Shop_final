@@ -17,10 +17,10 @@ interface UserDao {
     suspend fun getUserByName(name: String): UserEntity?
 
     @Query("SELECT * FROM users WHERE id = :userId")
-    suspend fun getUserById(userId: Int): UserEntity?
+    suspend fun getUserById(userId: String): UserEntity?
 
     @Query("SELECT * FROM users WHERE id = :userId")
-    fun observeUserById(userId: Int): Flow<UserEntity?>
+    fun observeUserById(userId: String): Flow<UserEntity?>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUser(user: UserEntity)

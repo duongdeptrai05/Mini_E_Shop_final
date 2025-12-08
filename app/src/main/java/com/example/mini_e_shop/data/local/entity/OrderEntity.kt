@@ -15,8 +15,9 @@ import java.util.Date
     ]
 )
 data class OrderEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val userId: Int,
+    @PrimaryKey
+    val id: String,
+    val userId: String,
     val totalAmount: Double,
     val createdAt: Date
 )

@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import java.util.UUID
 
 @HiltViewModel
 class AddEditProductViewModel @Inject constructor(
@@ -56,14 +57,14 @@ class AddEditProductViewModel @Inject constructor(
 //---------------------------------------------------------------
 
     // Lấy productId trực tiếp từ savedStateHandle. Nếu không có, mặc định là -1.
-    private var currentProductId: Int = savedStateHandle.get<Int>("productId") ?: -1
+    private var currentProductId: String? = savedStateHandle.get<String>("productId")
     init {
         // --- Sửa đổi 3: Viết lại toàn bộ khối init ---
         // Chỉ chạy logic lấy sản phẩm nếu productId không phải là -1 (tức là đang sửa)
-        if (currentProductId != -1) {
+        if (currentProductId != null) {
             viewModelScope.launch {
                 // Lấy sản phẩm từ repository
-                productRepository.getProductById(currentProductId)?.let { product ->
+                productRepository.getProductById(currentProductId!!)?.let { product ->
                     // Điền thông tin sản phẩm vào các StateFlow
                     _name.value = product.name
                     _brand.value = product.brand
@@ -116,11 +117,10 @@ fun saveProduct() {
     viewModelScope.launch {
         // --- Sửa đổi 4: Sửa lại logic tạo productToSave ---
         val imageUrlString = _imageUri.value?.toString() ?: ""
+        val productId = currentProductId ?: UUID.randomUUID().toString() // Nếu đang sửa, dùng ID cũ. Nếu tạo mới, tạo ID ngẫu nhiên mới.
 
         val productToSave = Product(
-            // Nếu là sản phẩm mới (currentProductId = -1), id sẽ là 0 để Room tự tạo.
-            // Nếu là sản phẩm cũ, id sẽ là giá trị đã có.
-            id = if (currentProductId == -1) 0 else currentProductId,
+            id = productId,
             name = name.value.trim(),
             brand = brand.value.trim(),
             category = category.value.trim(),

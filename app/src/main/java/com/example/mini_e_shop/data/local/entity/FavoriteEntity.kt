@@ -3,6 +3,6 @@ import androidx.room.Entity
 
 @Entity(tableName = "favorites", primaryKeys = ["userId", "productId"])
 data class FavoriteEntity(
-    val userId: Int,
-    val productId: Int
+    val userId: String,
+    val productId: String
 )

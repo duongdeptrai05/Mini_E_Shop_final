@@ -1,10 +1,10 @@
-package com.example.mini_e_shop.domain.model
+package com.example.mini_e_shop.data.datafirebase
 
 import com.google.firebase.firestore.DocumentId
 
 data class Product(
-    @get:DocumentId // Tự động lấy ID từ Firebase và gán vào trường này
-    val id: String = "", // SỬA THÀNH String và thêm giá trị mặc định
+    @DocumentId // Chú thích này sẽ tự động gán ID của document vào trường `id`
+    val id: String = "",
 
     val name: String = "",
     val brand: String = "",
@@ -12,6 +12,6 @@ data class Product(
     val origin: String = "",
     val price: Double = 0.0,
     val stock: Int = 0,
-    val imageUrl: String = "",
+    val imageUrl: String = "", // Đổi tên từ imageIn1 thành imageUrl cho thống nhất
     val description: String = ""
 )

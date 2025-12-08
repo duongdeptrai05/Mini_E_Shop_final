@@ -44,7 +44,9 @@ fun LoginScreen(
     LaunchedEffect(loginState) {
         when (val state = loginState) {
             is LoginViewModel.LoginState.Success -> {
-                onLoginSuccess(state.user)
+                if (state.user != null) {
+                    onLoginSuccess(state.user)
+                }
             }
             else -> {}
         }

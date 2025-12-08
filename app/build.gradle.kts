@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.kapt")
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -81,5 +82,11 @@ dependencies {
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+    implementation("com.google.firebase:firebase-analytics") // Phân tích (khuyến khích)
+    implementation("com.google.firebase:firebase-firestore-ktx") // Dành cho cơ sở dữ liệu Firestore
+    implementation("com.google.firebase:firebase-storage-ktx") // Dành cho lưu trữ file (ảnh)
+    implementation("com.google.firebase:firebase-auth-ktx")
 
 }

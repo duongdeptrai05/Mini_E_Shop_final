@@ -5,8 +5,8 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "products")
 data class ProductEntity(    // SỬA ĐỔI CHÍNH NẰM Ở ĐÂY
-    @PrimaryKey(autoGenerate = true)
-    val id: Int = 0, // Thêm giá trị mặc định là 0
+    @PrimaryKey
+    val id: String, // Thêm giá trị mặc định là 0
 
     val name: String,
     val brand: String,

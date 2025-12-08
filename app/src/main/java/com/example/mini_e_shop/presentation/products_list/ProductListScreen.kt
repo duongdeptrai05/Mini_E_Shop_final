@@ -37,8 +37,8 @@ import kotlinx.coroutines.launch
 fun ProductListScreen(
     viewModel: ProductListViewModel,
     isAdmin: Boolean,
-    onNavigateToAddEditProduct: (Int?) -> Unit,
-    onProductClick: (Int) -> Unit,
+    onNavigateToAddEditProduct: (String?) -> Unit,
+    onProductClick: (String) -> Unit,
     onNavigateToSupport: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()

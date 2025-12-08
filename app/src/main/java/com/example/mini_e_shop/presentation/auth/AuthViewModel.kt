@@ -40,45 +40,74 @@ class AuthViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    private val _sessionUser = MutableStateFlow<UserEntity?>(null)
+    val authState: StateFlow<AuthState> = userPreferencesManager.authPreferencesFlow
+        .map { prefs ->
+            if (prefs.isLoggedIn && prefs.loggedInUserId.isNotEmpty()) {
+                AuthState.Authenticated
+            } else {
+                AuthState.Unauthenticated
+            }
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AuthState.Loading)
 
-    val authState: StateFlow<AuthState> = combine(
-        userPreferencesManager.authPreferencesFlow,
-        _sessionUser
-    ) { prefs, sessionUser ->
-        if (prefs.isLoggedIn || sessionUser != null) {
-            AuthState.Authenticated
-        } else {
-            AuthState.Unauthenticated
+
+//    private val _sessionUser = MutableStateFlow<UserEntity?>(null)
+//
+//    val authState: StateFlow<AuthState> = combine(
+//        userPreferencesManager.authPreferencesFlow,
+//        _sessionUser
+//    ) { prefs, sessionUser ->
+//        if (prefs.isLoggedIn || sessionUser != null) {
+//            AuthState.Authenticated
+//        } else {
+//            AuthState.Unauthenticated
+//        }
+//    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AuthState.Loading)
+
+//    val mainUiState: StateFlow<MainUiState> = combine(
+//        userPreferencesManager.authPreferencesFlow,
+//        _sessionUser
+//    ) { prefs, sessionUser ->
+//        sessionUser?.id ?: if (prefs.isLoggedIn) prefs.loggedInUserId else null
+//    }.flatMapLatest { userId ->
+//        if (userId != null) {
+//            userRepository.observeUserById(userId)
+//        } else {
+//            flowOf(null)
+//        }
+//    }.map { userEntity ->
+//        if (userEntity != null) {
+//            MainUiState.Success(userEntity, userEntity.role == UserRole.ADMIN)
+//        } else {
+//            MainUiState.Success(null, false)
+//        }
+//    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MainUiState.Loading)
+
+    val mainUiState: StateFlow<MainUiState> = userPreferencesManager.authPreferencesFlow
+        .flatMapLatest { prefs ->
+            // Nếu đã đăng nhập và có UserID (String), thì đi lấy thông tin user từ Room
+            if (prefs.isLoggedIn && prefs.loggedInUserId.isNotEmpty()) {
+                // userRepository.observeUserById giờ đã nhận String và trả về Flow<UserEntity?>
+                userRepository.observeUserById(prefs.loggedInUserId)
+            } else {
+                // Nếu không, trả về một Flow chứa giá trị null
+                flowOf(null)
+            }
         }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AuthState.Loading)
-
-    val mainUiState: StateFlow<MainUiState> = combine(
-        userPreferencesManager.authPreferencesFlow,
-        _sessionUser
-    ) { prefs, sessionUser ->
-        sessionUser?.id ?: if (prefs.isLoggedIn) prefs.loggedInUserId else null
-    }.flatMapLatest { userId ->
-        if (userId != null) {
-            userRepository.observeUserById(userId)
-        } else {
-            flowOf(null)
+        .map { userEntity ->
+            val isAdmin = userEntity?.isAdmin ?: false
+            // Dù userEntity là null hay không, chúng ta đều gói nó trong Success state
+            // Lỗi ở đây sẽ hết vì chúng ta không còn truy cập `role` nữa
+            MainUiState.Success( userEntity, userEntity?.isAdmin ?: false)
         }
-    }.map { userEntity ->
-        if (userEntity != null) {
-            MainUiState.Success(userEntity, userEntity.role == UserRole.ADMIN)
-        } else {
-            MainUiState.Success(null, false)
-        }
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MainUiState.Loading)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MainUiState.Loading)
 
 
-    fun onLoginSuccess(user: UserEntity) {
-        _sessionUser.value = user
-    }
+//    fun onLoginSuccess(user: UserEntity) {
+//        _sessionUser.value = user
+//    }
 
     fun onLogout() {
-        _sessionUser.value = null
+//        _sessionUser.value = null
         viewModelScope.launch {
             userPreferencesManager.clearLoginState()
         }

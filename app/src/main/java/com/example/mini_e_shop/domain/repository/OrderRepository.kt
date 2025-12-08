@@ -8,10 +8,9 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface OrderRepository {
-    fun getOrders(userId: Int): Flow<List<OrderEntity>>
-    suspend fun createOrder(order: OrderEntity, items: List<OrderItemEntity>): Long
-    fun getOrderItems(orderId: Int): Flow<List<OrderItemEntity>>
-    suspend fun createOrderFromCart(userId: Int, cartItems: List<CartItemDetails>)
-    fun getOrdersForUser(userId: Int): Flow<List<Order>>
+    fun getOrders(userId: String): Flow<List<OrderEntity>>
+    fun getOrderItems(orderId: String): Flow<List<OrderItemEntity>>
+    suspend fun createOrderFromCart(userId: String, cartItems: List<CartItemDetails>)
+    fun getOrdersForUser(userId: String): Flow<List<Order>>
 }
 

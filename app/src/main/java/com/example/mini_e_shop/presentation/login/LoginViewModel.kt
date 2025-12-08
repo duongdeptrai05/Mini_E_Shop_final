@@ -5,18 +5,21 @@ import androidx.lifecycle.viewModelScope
 import com.example.mini_e_shop.data.local.entity.UserEntity
 import com.example.mini_e_shop.data.preferences.UserPreferencesManager
 import com.example.mini_e_shop.domain.repository.UserRepository
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import org.mindrot.jbcrypt.BCrypt
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val userPreferencesManager: UserPreferencesManager
+    private val userPreferencesManager: UserPreferencesManager,
+    private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
     private val _usernameOrEmail = MutableStateFlow("")
@@ -27,6 +30,9 @@ class LoginViewModel @Inject constructor(
 
     private val _rememberMe = MutableStateFlow(false)
     val rememberMe = _rememberMe.asStateFlow()
+
+    private val _loginEvent = Channel<LoginEvent>()
+    val loginEvent = _loginEvent.receiveAsFlow()
 
     private val _loginState = MutableStateFlow<LoginState>(LoginState.Idle)
     val loginState = _loginState.asStateFlow()
@@ -58,29 +64,50 @@ class LoginViewModel @Inject constructor(
     }
 
     fun loginUser() {
+        val email = _usernameOrEmail.value.trim()
+        val password = _password.value.trim()
+        if (email.isBlank() || password.isBlank()) {
+            _loginState.value = LoginState.Error("Vui lòng nhập email và mật khẩu")
+            return
+        }
         viewModelScope.launch {
             _loginState.value = LoginState.Loading
             try {
-                val loginIdentifier = _usernameOrEmail.value
-                var user = userRepository.getUserByEmail(loginIdentifier)
-                if (user == null) {
-                    user = userRepository.getUserByName(loginIdentifier)
-                }
+                // 1. Dùng Firebase để đăng nhập
+                firebaseAuth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // 2. Đăng nhập thành công, lấy user từ Firebase Auth
+                            val firebaseUser = task.result?.user
+                            if (firebaseUser != null) {
+                                // Lấy User ID kiểu String
+                                val userId = firebaseUser.uid
 
-                if (user != null && BCrypt.checkpw(_password.value, user.passwordHash)) {
-                    if (_rememberMe.value) {
-                        // Save the identifier that was used to log in
-                        userPreferencesManager.saveLoginState(user.id, loginIdentifier)
-                    } else {
-                        // If remember me is not checked, we should still save the logged in user's ID but clear the remember me identifier
-                         userPreferencesManager.saveLoginState(user.id, "")
+                                // Dùng viewModelScope.launch ở đây vì onCompleteListener không phải coroutine
+                                viewModelScope.launch {
+                                    // 3. Lưu trạng thái đăng nhập vào DataStore
+                                    userPreferencesManager.saveLoginState(
+                                        userId = userId,
+                                        email = email,
+                                        rememberMe = _rememberMe.value
+                                    )
+                                    // 4. Lấy thông tin chi tiết của user từ Room (tùy chọn)
+                                    val userEntity = userRepository.getUserById(userId)
+
+                                    _loginState.value = LoginState.Success(userEntity)
+                                    // Gửi sự kiện để điều hướng đến màn hình chính
+                                    _loginEvent.send(LoginEvent.NavigateToHome)
+                                }
+                            } else {
+                                _loginState.value = LoginState.Error("Không thể lấy thông tin người dùng")
+                            }
+                        } else {
+                            // Đăng nhập thất bại
+                            _loginState.value = LoginState.Error(
+                                task.exception?.message ?: "Email hoặc mật khẩu không đúng"
+                            )
+                        }
                     }
-                    
-                    _loginState.value = LoginState.Success(user)
-
-                } else {
-                    _loginState.value = LoginState.Error("Tên đăng nhập/email hoặc mật khẩu không đúng")
-                }
             } catch (e: Exception) {
                 _loginState.value = LoginState.Error("Đã có lỗi xảy ra: ${e.message}")
             }
@@ -90,7 +117,10 @@ class LoginViewModel @Inject constructor(
     sealed interface LoginState {
         object Idle : LoginState
         object Loading : LoginState
-        data class Success(val user: UserEntity) : LoginState
+        data class Success(val user: UserEntity?) : LoginState
         data class Error(val message: String) : LoginState
+    }
+    sealed interface LoginEvent {
+        object NavigateToHome : LoginEvent
     }
 }

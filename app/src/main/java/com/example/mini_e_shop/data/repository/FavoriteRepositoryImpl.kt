@@ -14,11 +14,11 @@ import javax.inject.Singleton
 class FavoriteRepositoryImpl @Inject constructor(
     private val favoriteDao: FavoriteDao
 ) : FavoriteRepository {
-    override fun getFavoriteProductIds(userId: Int): Flow<Set<Int>> {
+    override fun getFavoriteProductIds(userId: String): Flow<Set<String>> {
         return favoriteDao.getFavoriteProductIds(userId).map { it.toSet() }
     }
 
-    override suspend fun toggleFavorite(productId: Int, userId: Int) {
+    override suspend fun toggleFavorite(productId: String, userId: String) {
         val isFavorite = favoriteDao.isFavorite(userId, productId)
         if (isFavorite) {
             favoriteDao.removeFavorite(userId, productId)
@@ -28,9 +28,14 @@ class FavoriteRepositoryImpl @Inject constructor(
     }
 
     // EDIT: Add the new function implementation here
-    override fun getFavoriteProducts(userId: Int): Flow<List<Product>> {
+    override fun getFavoriteProducts(userId: String): Flow<List<Product>> {
         return favoriteDao.getFavoriteProducts(userId).map { favoriteProductEntities ->
             favoriteProductEntities.map { it.toDomain() }
+        }
+    }
+    override fun isFavorite(productId: String, userId: String): Flow<Boolean> {
+        return favoriteDao.getFavoriteProductIds(userId).map { favoriteIds ->
+            productId in favoriteIds
         }
     }
 }

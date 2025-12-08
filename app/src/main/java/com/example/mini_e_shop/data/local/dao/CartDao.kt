@@ -20,16 +20,16 @@ interface CartDao {
 
     @Transaction
     @Query("SELECT * FROM cart_items WHERE userId = :userId")
-    fun getCartItemsWithProducts(userId: Int): Flow<List<CartItemWithProduct>>
+    fun getCartItemsWithProducts(userId: String): Flow<List<CartItemWithProduct>>
 
     @Query("SELECT * FROM cart_items WHERE userId = :userId")
-    fun getCartItemsByUser(userId: Int): Flow<List<CartItemEntity>>
+    fun getCartItemsByUser(userId: String): Flow<List<CartItemEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addToCart(cartItem: CartItemEntity)
 
     @Query("DELETE FROM cart_items WHERE userId = :userId")
-    suspend fun clearCart(userId: Int)
+    suspend fun clearCart(userId: String)
 
     @Update
     suspend fun updateCartItem(cartItem: CartItemEntity)
@@ -46,4 +46,8 @@ interface CartDao {
     suspend fun upsertCartItem(cartItem: CartItemEntity)
     @Query("SELECT * FROM cart_items WHERE id IN (:cartItemIds)")
     suspend fun getCartItemsByIds(cartItemIds: List<Int>): List<CartItemWithProduct>
+
+    @Query("SELECT * FROM cart_items WHERE userId = :userId AND productId = :productId")
+    suspend fun getCartItem(userId: String, productId: String): CartItemEntity?
+
 }

@@ -21,8 +21,8 @@ fun MainScreen(
     mainNavController: NavHostController, // Để điều hướng ra các màn hình ngoài
     onNavigateToOrders: () -> Unit,
     onLogout: () -> Unit,
-    onNavigateToAddEditProduct: (Int?) -> Unit,
-    onProductClick: (Int) -> Unit,
+    onNavigateToAddEditProduct: (String?) -> Unit,
+    onProductClick: (String) -> Unit,
     onNavigateToSupport: () -> Unit,
     onNavigateToCheckout: (String) -> Unit
 ) {

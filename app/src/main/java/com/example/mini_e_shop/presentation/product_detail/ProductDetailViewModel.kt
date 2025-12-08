@@ -34,7 +34,7 @@ class ProductDetailViewModel @Inject constructor(
 
     init {
         // Lấy productId từ arguments
-        val productId: Int? = savedStateHandle.get("productId")
+        val productId: String? = savedStateHandle.get("productId")
         if (productId != null) {
             fetchProductDetails(productId)
         } else {
@@ -42,7 +42,7 @@ class ProductDetailViewModel @Inject constructor(
         }
     }
 
-    private fun fetchProductDetails(productId: Int) {
+    private fun fetchProductDetails(productId: String) {
         viewModelScope.launch {
             try {
                 // Gọi repository để lấy sản phẩm

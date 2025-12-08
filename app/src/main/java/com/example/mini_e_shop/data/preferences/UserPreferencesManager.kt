@@ -9,6 +9,8 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.mini_e_shop.data.preferences.UserPreferencesManager.PreferenceKeys.IS_LOGGED_IN
+import com.example.mini_e_shop.data.preferences.UserPreferencesManager.PreferenceKeys.LOGGED_IN_USER_ID
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -21,7 +23,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 data class AuthPreferences(
     val isLoggedIn: Boolean,
-    val loggedInUserId: Int,
+    val loggedInUserId: String,
     val rememberMeEmail: String // For pre-filling the login form
 )
 
@@ -30,7 +32,7 @@ class UserPreferencesManager @Inject constructor(@ApplicationContext private val
 
     private object PreferenceKeys {
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
-        val LOGGED_IN_USER_ID = intPreferencesKey("logged_in_user_id")
+        val LOGGED_IN_USER_ID = stringPreferencesKey("logged_in_user_id")
         val REMEMBER_ME_EMAIL = stringPreferencesKey("remember_me_email")
     }
 
@@ -43,17 +45,21 @@ class UserPreferencesManager @Inject constructor(@ApplicationContext private val
             }
         }.map { preferences ->
             val isLoggedIn = preferences[PreferenceKeys.IS_LOGGED_IN] ?: false
-            val userId = preferences[PreferenceKeys.LOGGED_IN_USER_ID] ?: -1
+            val userId = preferences[PreferenceKeys.LOGGED_IN_USER_ID] ?: ""
             val email = preferences[PreferenceKeys.REMEMBER_ME_EMAIL] ?: ""
             AuthPreferences(isLoggedIn, userId, email)
         }
 
-    suspend fun saveLoginState(userId: Int, email: String) {
+    suspend fun saveLoginState(userId: String, email: String,rememberMe: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.IS_LOGGED_IN] = true
             preferences[PreferenceKeys.LOGGED_IN_USER_ID] = userId
-            preferences[PreferenceKeys.REMEMBER_ME_EMAIL] = email // Always save email for convenience
-        }
+            if (rememberMe) {
+                preferences[PreferenceKeys.REMEMBER_ME_EMAIL] = email
+            } else {
+                // Nếu người dùng không chọn, hãy xóa email đã lưu (nếu có)
+                preferences.remove(PreferenceKeys.REMEMBER_ME_EMAIL)
+            }        }
     }
 
     suspend fun clearLoginState() {
@@ -67,6 +73,12 @@ class UserPreferencesManager @Inject constructor(@ApplicationContext private val
     suspend fun saveRememberMeEmail(email: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferenceKeys.REMEMBER_ME_EMAIL] = email
+        }
+    }
+    suspend fun saveAuthPreferences(isLoggedIn: Boolean, userId: String) { // Nhận vào String
+        context.dataStore.edit { preferences ->
+            preferences[IS_LOGGED_IN] = isLoggedIn
+            preferences[LOGGED_IN_USER_ID] = userId // Lưu String
         }
     }
 }

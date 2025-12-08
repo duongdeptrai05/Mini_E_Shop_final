@@ -21,8 +21,8 @@ import com.example.mini_e_shop.ui.theme.*
 @Composable
 fun FavoritesScreen(
     viewModel: FavoritesViewModel = hiltViewModel(),
-    onProductClick: (Int) -> Unit,
-    onNavigateToAddEditProduct: (Int?) -> Unit
+    onProductClick: (String) -> Unit,
+    onNavigateToAddEditProduct: (String?) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

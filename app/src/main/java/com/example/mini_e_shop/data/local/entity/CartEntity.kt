@@ -6,7 +6,7 @@ import androidx.room.Index
 
 @Entity(
     tableName = "cart_items",
-    primaryKeys = ["userId", "productId"],
+
     foreignKeys = [
         ForeignKey(
             entity = UserEntity::class,

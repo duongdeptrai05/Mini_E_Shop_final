@@ -19,7 +19,7 @@ class CartRepositoryImpl @Inject constructor(
     private val cartDao: CartDao
 ) : CartRepository {
 
-    override fun getCartItems(userId: Int): Flow<List<CartItemDetails>> {
+    override fun getCartItems(userId: String): Flow<List<CartItemDetails>> {
         return cartDao.getCartItemsWithProducts(userId).map {
             it.map { cartItemWithProduct ->
                 cartItemWithProduct.toCartItemDetails()
@@ -27,16 +27,25 @@ class CartRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun addProductToCart(product: Product, userId: Int) {
-        // TODO: Logic phức tạp hơn có thể được thêm ở đây,
-        // ví dụ: kiểm tra xem sản phẩm đã có trong giỏ chưa để tăng số lượng.
-        // Hiện tại, chúng ta sẽ thêm mới hoặc cập nhật với số lượng là 1.
-        val cartItem = CartItemEntity(
-            userId = userId,
-            productId = product.id,
-            quantity = 1 // Mặc định thêm 1 sản phẩm
-        )
-        cartDao.upsertCartItem(cartItem)
+    override suspend fun addProductToCart(product: Product, userId: String) {
+        // Kiểm tra xem sản phẩm đã có trong giỏ hàng của người dùng này chưa
+        val existingItem = cartDao.getCartItem(userId, product.id)
+
+        if (existingItem != null) {
+            // Nếu đã có, chỉ tăng số lượng
+            val updatedItem = existingItem.copy(quantity = existingItem.quantity + 1)
+            cartDao.upsertCartItem(updatedItem)
+        } else {
+            // Nếu chưa có, tạo item mới
+            val newItem = CartItemEntity(
+                userId = userId,
+                // Gán trực tiếp vì cả hai đều là String, không cần toInt()
+                productId = product.id,
+                quantity = 1
+            )
+            cartDao.upsertCartItem(newItem)
+        }
+        // TODO: Nâng cấp để đẩy thay đổi giỏ hàng này lên Firestore
     }
     override suspend fun getCartItemsByIds(cartItemIds: List<Int>): List<CartItemDetails> {
         return cartDao.getCartItemsByIds(cartItemIds).map{ cartItemWithProduct ->
@@ -51,7 +60,7 @@ class CartRepositoryImpl @Inject constructor(
         cartDao.deleteCartItem(cartItemId)
     }
 
-    override suspend fun clearCart(userId: Int) {
+    override suspend fun clearCart(userId: String) {
         cartDao.clearCart(userId)
     }
 }

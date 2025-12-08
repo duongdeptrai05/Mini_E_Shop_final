@@ -1,7 +1,7 @@
 package com.example.mini_e_shop.domain.model
 
 data class Products (
-    val id: Int,
+    val id: String,
     val name: String,
     val brand: String,
     val category: String,

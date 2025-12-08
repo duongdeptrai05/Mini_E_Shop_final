@@ -158,7 +158,7 @@ sealed class ProductListUiState {
     data class Success(
         val products: List<Product>,
         val categories: List<String> = emptyList(),
-        val favoriteStatusMap: Map<Int, Boolean> = emptyMap()
+        val favoriteStatusMap: Map<String, Boolean> = emptyMap()
     ) : ProductListUiState()
     data class Error(val message: String) : ProductListUiState()
 }

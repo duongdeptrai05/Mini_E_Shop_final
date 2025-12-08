@@ -9,6 +9,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import com.example.mini_e_shop.data.preferences.UserPreferencesManager
+import kotlinx.coroutines.flow.flowOf
 
 @Singleton
 class UserRepositoryImpl @Inject constructor(
@@ -23,11 +24,11 @@ class UserRepositoryImpl @Inject constructor(
         return userDao.getUserByName(name)
     }
 
-    override suspend fun getUserById(userId: Int): UserEntity? {
+    override suspend fun getUserById(userId: String): UserEntity? {
         return userDao.getUserById(userId)
     }
 
-    override fun observeUserById(userId: Int): Flow<UserEntity?> {
+    override fun observeUserById(userId: String): Flow<UserEntity?> {
         return userDao.observeUserById(userId)
     }
 
@@ -36,11 +37,10 @@ class UserRepositoryImpl @Inject constructor(
     }
     override fun getCurrentUser(): Flow<UserEntity?> {
         return preferencesManager.authPreferencesFlow.flatMapLatest { prefs ->
-            if (prefs.isLoggedIn && prefs.loggedInUserId != -1){
+            if (prefs.isLoggedIn && prefs.loggedInUserId.isNotEmpty()){
                 userDao.observeUserById(prefs.loggedInUserId)
             } else {
-                // Nếu người dùng chưa đăng nhập, trả về một Flow chứa giá trị null.
-                kotlinx.coroutines.flow.flowOf(null)
+                flowOf(null)
             }
         }
     }
