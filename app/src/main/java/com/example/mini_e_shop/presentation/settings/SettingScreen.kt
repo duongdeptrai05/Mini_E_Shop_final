@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mini_e_shop.R
 import com.example.mini_e_shop.data.local.entity.UserEntity
+import android.app.Activity
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,6 +48,7 @@ fun SettingsScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val rememberedContext = remember { context }
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showEditInfoDialog by remember { mutableStateOf(false) }
     var showPrivacyPolicyDialog by remember { mutableStateOf(false) }
@@ -55,6 +58,12 @@ fun SettingsScreen(
     LaunchedEffect(currentUser) {
         if (currentUser != null) {
             viewModel.updateUserInfo(currentUser.name, currentUser.email)
+        }
+    }
+    // Lắng nghe sự kiện để tải lại Activity
+    LaunchedEffect(Unit) {
+        viewModel.recreateActivityEvent.collectLatest {
+            (rememberedContext as? Activity)?.recreate()
         }
     }
 
@@ -76,7 +85,7 @@ fun SettingsScreen(
             onSave = { name, email ->
                 viewModel.updateUserInfo(name, email)
                 showEditInfoDialog = false
-                Toast.makeText(context, context.getString(R.string.update_info_success), Toast.LENGTH_SHORT).show()
+                Toast.makeText(rememberedContext, rememberedContext.getString(R.string.update_info_success), Toast.LENGTH_SHORT).show()
             }
         )
     }
@@ -140,8 +149,8 @@ fun SettingsScreen(
                     checked = state.notificationsEnabled,
                     onCheckedChange = {
                         viewModel.toggleNotifications(it)
-                        val message = if (it) context.getString(R.string.notifications_on_success) else context.getString(R.string.notifications_off_success)
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        val message = if (it) rememberedContext.getString(R.string.notifications_on_success) else rememberedContext.getString(R.string.notifications_off_success)
+                        Toast.makeText(rememberedContext, message, Toast.LENGTH_SHORT).show()
                     }
                 )
                 Divider(color = Color(0xFFF3F4F6), thickness = 1.dp)
@@ -164,8 +173,8 @@ fun SettingsScreen(
                     checked = state.darkModeEnabled,
                     onCheckedChange = {
                         viewModel.toggleDarkMode(it)
-                        val message = if (it) context.getString(R.string.dark_mode_on_success) else context.getString(R.string.dark_mode_off_success)
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        val message = if (it) rememberedContext.getString(R.string.dark_mode_on_success) else rememberedContext.getString(R.string.dark_mode_off_success)
+                        Toast.makeText(rememberedContext, message, Toast.LENGTH_SHORT).show()
                     }
                 )
             }

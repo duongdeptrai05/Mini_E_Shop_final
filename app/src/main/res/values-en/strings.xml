@@ -28,8 +28,8 @@
     <string name="favorites">Favorites</string>
     <string name="cart">Cart</string>
     <string name="profile">Profile</string>
-    <string name="dinh_manh_electronics">Dinh Manh Electronics</string>
-    <string name="search_products">Search products...</string>
+    <string name="dinh_manh_electronics">Điện Tử Văn Mạnh</string>
+    <string name="search_products">Search products at Van Manh...</string>
     <string name="sort">Sort</string>
     <string name="default_sort">Default</string>
     <string name="price_asc">Price: Low to High</string>
@@ -52,6 +52,16 @@
     <string name="category_monitor">Monitor</string>
     <string name="category_accessory">Accessory</string>
     <string name="sold_count">%1$d sold</string>
+    <string name="search_at_dinh_manh">Search at Dinh Manh...</string>
+    <string name="out_of_stock_uppercase">OUT OF STOCK</string>
+    <string name="add_to_cart_full">Add to Cart</string>
+    <string name="add_to_cart_success">Added \'%1$s\' to cart</string>
+    <string name="add_to_favorites_success">Added \'%1$s\' to favorites</string>
+    <string name="remove_from_favorites_success">Removed \'%1$s\' from favorites</string>
+    <string name="product_out_of_stock">Product is out of stock</string>
+    <string name="add_to_cart_error">Error: Could not add to cart</string>
+    <string name="favorite_action_error">Error: Operation failed</string>
+    <string name="please_login">Please login to continue</string>
 
     <!-- Product Detail Screen -->
     <string name="product_detail_title">Product Detail</string>
@@ -79,6 +89,21 @@
     <string name="cart_total_payment">Total Payment</string>
     <string name="cart_checkout">Checkout</string>
     <string name="cart_buy_now">Buy now (%d)</string>
+
+    <!-- Checkout Screen -->
+    <string name="checkout_title">Confirm Order</string>
+    <string name="checkout_confirm_order">Confirm Order - $%1$.2f</string>
+    <string name="checkout_products_in_order">Products in order:</string>
+    <string name="checkout_no_items">No items to check out.</string>
+    <string name="checkout_load_error">Could not load item details.</string>
+    <string name="checkout_error">Error: %1$s</string>
+    <string name="checkout_insufficient_stock">Product \'%1$s\' is out of stock.</string>
+    <string name="checkout_order_success">Order placed successfully!</string>
+
+    <!-- Orders Screen -->
+    <string name="no_orders">You don\'t have any orders yet.</string>
+    <string name="order_number">Order #%1$d</string>
+    <string name="order_total">Total: $%1$.2f</string>
 
     <!-- Contact Screen -->
     <string name="contact_screen_title">Support Staff</string>

@@ -229,13 +229,14 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SetLanguage(languageCode: String) {
     val context = LocalContext.current
+    val rememberedContext = remember { context }
     LaunchedEffect(languageCode) {
         val locale = Locale(languageCode)
         Locale.setDefault(locale)
-        val resources = context.resources
+        val resources = rememberedContext.resources
         val config = Configuration(resources.configuration)
         config.setLocale(locale)
-        context.createConfigurationContext(config)
+        rememberedContext.createConfigurationContext(config)
         resources.updateConfiguration(config, resources.displayMetrics)
     }
 }

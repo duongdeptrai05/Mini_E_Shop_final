@@ -3,11 +3,7 @@ package com.example.mini_e_shop.presentation.main.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -20,10 +16,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.mini_e_shop.presentation.navigation.Screen
@@ -87,7 +83,7 @@ fun BottomNavigationBar(navController: NavController) {
                     ) {
                         Icon(
                             imageVector = screen.icon!!,
-                            contentDescription = screen.title?.let{ stringResource(id = it) },
+                            contentDescription = screen.title?.let { stringResource(it) },
                             modifier = Modifier
                                 .scale(scale)
                                 .size(22.dp),
@@ -96,16 +92,12 @@ fun BottomNavigationBar(navController: NavController) {
                     }
                 },
                 label = {
-                    if (isSelected) {
-                        screen.title?.let {
-                            Text(
-                                text = stringResource(id = it),
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.SemiBold,
-                                color = PrimaryIndigo
-                            )
-                        }
-                    }
+                    Text(
+                        text = stringResource(screen.title!!),
+                        fontSize = 11.sp,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                        color = if (isSelected) pageColor else TextSecondary
+                    )
                 },
                 selected = isSelected,
                 onClick = {

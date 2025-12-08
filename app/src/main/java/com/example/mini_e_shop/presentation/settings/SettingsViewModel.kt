@@ -43,10 +43,12 @@ class SettingsViewModel @Inject constructor(
             ) }
 
             userPreferencesManager.languageFlow.collect { langCode ->
-                _state.update { it.copy(
-                    languageCode = langCode,
-                    language = if (langCode == "vi") "Tiếng Việt" else "English"
-                ) }
+                if (langCode != _state.value.languageCode) {
+                    _state.update { it.copy(
+                        languageCode = langCode,
+                        language = if (langCode == "vi") "Tiếng Việt" else "English"
+                    ) }
+                }
             }
         }
     }
@@ -60,9 +62,11 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun changeLanguage(newLanguageCode: String) {
-        viewModelScope.launch {
-            userPreferencesManager.saveLanguage(newLanguageCode)
-            _recreateActivityEvent.emit(Unit)
+        if (newLanguageCode != _state.value.languageCode) {
+            viewModelScope.launch {
+                userPreferencesManager.saveLanguage(newLanguageCode)
+                _recreateActivityEvent.emit(Unit)
+            }
         }
     }
 

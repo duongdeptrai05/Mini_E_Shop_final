@@ -88,7 +88,8 @@ class CheckoutViewModel @Inject constructor(
                 for (item in currentState.items) {
                     val product = productRepository.getProductById(item.product.id)
                     if (product == null || product.stock < item.cartItem.quantity) {
-                        _eventChannel.send(CheckoutEvent.ShowSnackbar("Sản phẩm '${item.product.name}' không đủ hàng trong kho."))
+                        // Use a format that can be recognized and translated in UI layer
+                        _eventChannel.send(CheckoutEvent.ShowSnackbar("INSUFFICIENT_STOCK:${item.product.name}"))
                         return@launch
                     }
                 }

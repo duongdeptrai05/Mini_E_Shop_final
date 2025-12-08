@@ -63,6 +63,7 @@ fun SupportScreen(
         )
     }
     val context = LocalContext.current
+    val rememberedContext = remember { context }
     var showEmojiPicker by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
@@ -72,7 +73,7 @@ fun SupportScreen(
     ) { bitmap: Bitmap? ->
         if (bitmap != null) {
             // TODO: Handle the bitmap image (e.g., display in chat, upload to server)
-            Toast.makeText(context, context.getString(R.string.support_photo_taken), Toast.LENGTH_SHORT).show()
+            Toast.makeText(rememberedContext, rememberedContext.getString(R.string.support_photo_taken), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -85,7 +86,7 @@ fun SupportScreen(
             cameraLauncher.launch()
         } else {
             // Permission denied
-            Toast.makeText(context, context.getString(R.string.support_camera_permission_denied), Toast.LENGTH_SHORT).show()
+            Toast.makeText(rememberedContext, rememberedContext.getString(R.string.support_camera_permission_denied), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -150,7 +151,7 @@ fun SupportScreen(
                 },
                 onCameraClick = {
                     when (PackageManager.PERMISSION_GRANTED) {
-                        ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) -> cameraLauncher.launch()
+                        ContextCompat.checkSelfPermission(rememberedContext, Manifest.permission.CAMERA) -> cameraLauncher.launch()
                         else -> permissionLauncher.launch(Manifest.permission.CAMERA)
                     }
                 },

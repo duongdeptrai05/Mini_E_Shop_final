@@ -28,8 +28,8 @@
     <string name="favorites">Yêu thích</string>
     <string name="cart">Giỏ hàng</string>
     <string name="profile">Cá nhân</string>
-    <string name="dinh_manh_electronics">Điện tử Đình Mạnh</string>
-    <string name="search_products">Tìm kiếm sản phẩm...</string>
+    <string name="dinh_manh_electronics">Điện tử Văn Mạnh</string>
+    <string name="search_products">Tìm kiếm sản phẩm tại Văn Mạnh...</string>
     <string name="sort">Sắp xếp</string>
     <string name="default_sort">Mặc định</string>
     <string name="price_asc">Giá tăng dần</string>
@@ -52,6 +52,16 @@
     <string name="category_monitor">Màn hình</string>
     <string name="category_accessory">Phụ kiện</string>
     <string name="sold_count">Đã bán %1$d</string>
+    <string name="search_at_dinh_manh">Tìm kiếm tại Văn Mạnh...</string>
+    <string name="out_of_stock_uppercase">HẾT HÀNG</string>
+    <string name="add_to_cart_full">Thêm vào giỏ hàng</string>
+    <string name="add_to_cart_success">Đã thêm \'%1$s\' vào giỏ hàng</string>
+    <string name="add_to_favorites_success">Đã thêm \'%1$s\' vào danh sách yêu thích</string>
+    <string name="remove_from_favorites_success">Đã xóa \'%1$s\' khỏi danh sách yêu thích</string>
+    <string name="product_out_of_stock">Sản phẩm đã hết hàng</string>
+    <string name="add_to_cart_error">Lỗi: Không thể thêm vào giỏ hàng</string>
+    <string name="favorite_action_error">Lỗi: Thao tác thất bại</string>
+    <string name="please_login">Vui lòng đăng nhập để thực hiện</string>
 
     <!-- Product Detail Screen -->
     <string name="product_detail_title">Chi tiết sản phẩm</string>
@@ -79,6 +89,21 @@
     <string name="cart_total_payment">Tổng thanh toán</string>
     <string name="cart_checkout">Thanh toán</string>
     <string name="cart_buy_now">Mua hàng (%d)</string>
+
+    <!-- Checkout Screen -->
+    <string name="checkout_title">Xác nhận đặt hàng</string>
+    <string name="checkout_confirm_order">Xác nhận đặt hàng - $%1$.2f</string>
+    <string name="checkout_products_in_order">Sản phẩm trong đơn hàng:</string>
+    <string name="checkout_no_items">Không có sản phẩm để thanh toán.</string>
+    <string name="checkout_load_error">Không thể tải thông tin sản phẩm.</string>
+    <string name="checkout_error">Lỗi: %1$s</string>
+    <string name="checkout_insufficient_stock">Sản phẩm \'%1$s\' không đủ hàng trong kho.</string>
+    <string name="checkout_order_success">Đặt hàng thành công!</string>
+
+    <!-- Orders Screen -->
+    <string name="no_orders">Bạn chưa có đơn hàng nào.</string>
+    <string name="order_number">Đơn hàng #%1$d</string>
+    <string name="order_total">Tổng cộng: $%1$.2f</string>
 
     <!-- Contact Screen -->
     <string name="contact_screen_title">Nhân viên hỗ trợ</string>

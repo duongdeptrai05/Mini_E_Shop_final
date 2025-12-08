@@ -12,9 +12,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mini_e_shop.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -26,13 +28,27 @@ fun CheckoutScreen(
     onShowSnackbar: (String) -> Unit
 ) {
     val uiState by checkoutViewModel.uiState.collectAsState()
+    
+    // Get string resources for translation (outside LaunchedEffect)
+    val orderSuccessMessage = stringResource(R.string.checkout_order_success)
 
     // EDIT: Listen for events from CheckoutViewModel
     LaunchedEffect(key1 = true) {
         checkoutViewModel.eventFlow.collect { event ->
             when(event) {
                 is CheckoutEvent.NavigateBack -> onNavigateBack()
-                is CheckoutEvent.ShowSnackbar -> onShowSnackbar(event.message)
+                is CheckoutEvent.ShowSnackbar -> {
+                    val translatedMessage = when {
+                        event.message.startsWith("INSUFFICIENT_STOCK:") -> {
+                            val productName = event.message.removePrefix("INSUFFICIENT_STOCK:")
+                            // Format message with product name (will be translated in UI if needed)
+                            "Sản phẩm '$productName' không đủ hàng trong kho."
+                        }
+                        event.message == "Order placed successfully!" -> orderSuccessMessage
+                        else -> event.message
+                    }
+                    onShowSnackbar(translatedMessage)
+                }
             }
         }
     }
@@ -40,10 +56,10 @@ fun CheckoutScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Xác nhận đặt hàng", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.checkout_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Quay lại")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -59,7 +75,7 @@ fun CheckoutScreen(
                         .padding(16.dp)
                         .height(56.dp)
                 ) {
-                    Text("Xác nhận đặt hàng - $${String.format("%.2f", successState.totalPrice)}", fontWeight = FontWeight.Bold)
+                    Text(stringResource(R.string.checkout_confirm_order, successState.totalPrice), fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -76,7 +92,7 @@ fun CheckoutScreen(
                 is CheckoutUiState.Success -> {
                     LazyColumn(contentPadding = PaddingValues(16.dp)) {
                         item {
-                            Text("Sản phẩm trong đơn hàng:", style = MaterialTheme.typography.titleMedium)
+                            Text(stringResource(R.string.checkout_products_in_order), style = MaterialTheme.typography.titleMedium)
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                         items(state.items) { cartItemDetail ->
@@ -93,7 +109,19 @@ fun CheckoutScreen(
                     }
                 }
                 is CheckoutUiState.Error -> {
-                    Text(state.message, modifier = Modifier.align(Alignment.Center))
+                    val errorMessage = when (state.message) {
+                        "No items to check out." -> stringResource(R.string.checkout_no_items)
+                        "Could not load item details." -> stringResource(R.string.checkout_load_error)
+                        else -> {
+                            if (state.message.startsWith("Error: ")) {
+                                val errorDetail = state.message.removePrefix("Error: ")
+                                stringResource(R.string.checkout_error, errorDetail)
+                            } else {
+                                state.message
+                            }
+                        }
+                    }
+                    Text(errorMessage, modifier = Modifier.align(Alignment.Center))
                 }
             }
         }

@@ -54,12 +54,39 @@ fun ProductListScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val rememberedContext = remember { context }
+    
+    // Get string resources for translation (outside LaunchedEffect)
+    val productOutOfStockMessage = stringResource(R.string.product_out_of_stock)
+    val addToCartErrorMessage = stringResource(R.string.add_to_cart_error)
+    val favoriteActionErrorMessage = stringResource(R.string.favorite_action_error)
+    val pleaseLoginMessage = stringResource(R.string.please_login)
 
     LaunchedEffect(key1 = true) {
         viewModel.eventFlow.collectLatest { event ->
             scope.launch {
+                val translatedMessage = when {
+                    event.startsWith("ADD_TO_CART_SUCCESS:") -> {
+                        val productName = event.removePrefix("ADD_TO_CART_SUCCESS:")
+                        rememberedContext.resources.getString(R.string.add_to_cart_success, productName)
+                    }
+                    event.startsWith("ADD_TO_FAVORITES_SUCCESS:") -> {
+                        val productName = event.removePrefix("ADD_TO_FAVORITES_SUCCESS:")
+                        rememberedContext.resources.getString(R.string.add_to_favorites_success, productName)
+                    }
+                    event.startsWith("REMOVE_FROM_FAVORITES_SUCCESS:") -> {
+                        val productName = event.removePrefix("REMOVE_FROM_FAVORITES_SUCCESS:")
+                        rememberedContext.resources.getString(R.string.remove_from_favorites_success, productName)
+                    }
+                    event == "PRODUCT_OUT_OF_STOCK" -> productOutOfStockMessage
+                    event == "ADD_TO_CART_ERROR" -> addToCartErrorMessage
+                    event == "FAVORITE_ACTION_ERROR" -> favoriteActionErrorMessage
+                    event == "PLEASE_LOGIN" -> pleaseLoginMessage
+                    else -> event
+                }
                 snackbarHostState.showSnackbar(
-                    message = event,
+                    message = translatedMessage,
                     duration = SnackbarDuration.Short
                 )
             }
@@ -156,7 +183,7 @@ fun CompactHeader(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 4.dp), // chừa an toàn cho tai thỏ
+            .padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp), // Padding top để tránh status bar
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -164,7 +191,7 @@ fun CompactHeader(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = stringResource(id = R.string.dinh_manh_electronics),
+                text = stringResource(R.string.dinh_manh_electronics),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = TextPrimary
@@ -179,7 +206,7 @@ fun CompactHeader(
             ) {
                 Icon(
                     Icons.Default.ContactSupport,
-                    contentDescription = stringResource(id = R.string.support),
+                    contentDescription = "Support",
                     tint = HomeColor,
                     modifier = Modifier.size(24.dp)
                 )
@@ -193,7 +220,7 @@ fun CompactHeader(
                 .fillMaxWidth()
                 .height(50.dp), 
             placeholder = {
-                Text(stringResource(id = R.string.search_products), fontSize = 14.sp, color = TextLight)
+                Text(stringResource(R.string.search_at_dinh_manh), fontSize = 14.sp, color = TextLight)
             },
             leadingIcon = {
                 Icon(Icons.Default.Search, contentDescription = null, tint = TextSecondary, modifier = Modifier.size(20.dp))
@@ -232,7 +259,7 @@ private fun CompactSortButton(
         ) {
             Icon(
                 Icons.Default.Sort,
-                contentDescription = stringResource(id = R.string.sort),
+                contentDescription = "Sort",
                 tint = if(selectedSortType != SortType.NONE) Color.White else TextSecondary,
                 modifier = Modifier.size(20.dp)
             )
@@ -242,11 +269,10 @@ private fun CompactSortButton(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
-            val options = mapOf(
-                SortType.PRICE_ASC to stringResource(id = R.string.price_asc),
-                SortType.PRICE_DESC to stringResource(id = R.string.price_desc),
-                SortType.NAME_ASC to stringResource(id = R.string.name_asc),
-                SortType.NAME_DESC to stringResource(id = R.string.name_desc)
+            val options = listOf(
+                SortType.PRICE_ASC to stringResource(R.string.price_asc),
+                SortType.PRICE_DESC to stringResource(R.string.price_desc),
+                SortType.NAME_ASC to stringResource(R.string.name_asc)
             )
 
             options.forEach { (type, label) ->
@@ -265,30 +291,13 @@ private fun CompactSortButton(
             }
             Divider()
             DropdownMenuItem(
-                text = { Text(stringResource(id = R.string.default_sort), color = TextSecondary) },
+                text = { Text(stringResource(R.string.default_sort), color = TextSecondary) },
                 onClick = {
                     onSortTypeSelected(SortType.NONE)
                     expanded = false
                 }
             )
         }
-    }
-}
-
-@Composable
-private fun getCategoryStringResource(category: String): String {
-    return when (category) {
-        "Tất cả" -> stringResource(id = R.string.category_all)
-        "Điện thoại" -> stringResource(id = R.string.category_phone)
-        "Laptop" -> stringResource(id = R.string.category_laptop)
-        "Tai nghe" -> stringResource(id = R.string.category_headphone)
-        "Máy tính bảng" -> stringResource(id = R.string.category_tablet)
-        "Đồng hồ" -> stringResource(id = R.string.category_watch)
-        "Máy ảnh" -> stringResource(id = R.string.category_camera)
-        "Gaming" -> stringResource(id = R.string.category_gaming)
-        "Màn hình" -> stringResource(id = R.string.category_monitor)
-        "Phụ kiện" -> stringResource(id = R.string.category_accessory)
-        else -> category
     }
 }
 
@@ -311,7 +320,7 @@ private fun CategoryTabs(
                 onClick = { onCategorySelected(category) },
                 label = {
                     Text(
-                        text = getCategoryStringResource(category = category),
+                        text = category,
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
                     )
@@ -344,7 +353,7 @@ fun ProductCard(
     isFavorite: Boolean
 ) {
     val isOutOfStock = product.stock == 0
-    // Mock data để demo giao diện đầy đủ
+    // Mock data để demo giao diện đầy đủ (Sau này bạn thêm vào Product Entity)
     val rating = 4.8
     val soldCount = 120
 
@@ -388,13 +397,13 @@ fun ProductCard(
                                 .padding(2.dp),
                             horizontalArrangement = Arrangement.spacedBy(2.dp)
                         ) {
-                            Icon(imageVector = Icons.Default.Edit, contentDescription = stringResource(id = R.string.edit), tint = PrimaryIndigo, modifier = Modifier.size(20.dp).clickable { onEdit() })
-                            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete), tint = ErrorRed, modifier = Modifier.size(20.dp).clickable { onDelete() })
+                            Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit", tint = PrimaryIndigo, modifier = Modifier.size(20.dp).clickable { onEdit() })
+                            Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete", tint = ErrorRed, modifier = Modifier.size(20.dp).clickable { onDelete() })
                         }
                     } else {
                         Icon(
                             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                            contentDescription = stringResource(id = R.string.favorites),
+                            contentDescription = "Favorite",
                             tint = if (isFavorite) Color.Red else Color.Gray,
                             modifier = Modifier
                                 .size(24.dp)
@@ -413,7 +422,7 @@ fun ProductCard(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = stringResource(id = R.string.out_of_stock).uppercase(),
+                            text = stringResource(R.string.out_of_stock_uppercase),
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.labelMedium
@@ -509,7 +518,7 @@ fun ProductCard(
                         ) {
                             Icon(
                                 Icons.Outlined.AddShoppingCart,
-                                contentDescription = stringResource(id = R.string.add_to_cart),
+                                contentDescription = "Add",
                                 tint = Color.White,
                                 modifier = Modifier.size(18.dp)
                             )

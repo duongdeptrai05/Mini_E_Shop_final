@@ -29,7 +29,10 @@ import coil.request.ImageRequest
 import com.example.mini_e_shop.R
 import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.ui.theme.PrimaryBlue
-import java.text.DecimalFormat
+import androidx.compose.foundation.layout.WindowInsets
+import java.text.NumberFormat
+import java.util.Locale
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,12 +44,14 @@ fun ProductDetailScreen(
     val successState = uiState as? ProductDetailUiState.Success
 
     Scaffold(
+        contentWindowInsets = WindowInsets.statusBars, // Chừa khoảng cách cho status bar
         topBar = {
             TopAppBar(
-                title = { Text(text = stringResource(id = R.string.product_detail_title)) },
+                title = { Text(text = stringResource(R.string.product_detail_title)) },
+                windowInsets = WindowInsets.statusBars, // Chừa khoảng cách cho status bar
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(R.string.back))
                     }
                 }
             )
@@ -149,17 +154,17 @@ private fun StockBadge(stock: Int) {
         stock > 10 -> Triple(
             Color(0xFFE6F4EA),
             Color(0xFF1E8E3E),
-            stringResource(id = R.string.stock_available, stock)
+            stringResource(R.string.stock_available, stock)
         )
         stock in 1..10 -> Triple(
             Color(0xFFFFF4E5),
             Color(0xFFB26B00),
-            stringResource(id = R.string.stock_few_left, stock)
+            stringResource(R.string.stock_few_left, stock)
         )
         else -> Triple(
             Color(0xFFFFEBEE),
             Color(0xFFC62828),
-            stringResource(id = R.string.out_of_stock)
+            stringResource(R.string.out_of_stock)
         )
     }
 
@@ -180,8 +185,7 @@ private fun StockBadge(stock: Int) {
 }
 
 private fun formatCurrency(price: Double): String {
-    val formatter = DecimalFormat("$#0")
-    return formatter.format(price)
+    return "$${String.format("%.2f", price)}"
 }
 @Composable
 fun ProductDetailsContent(
@@ -236,8 +240,8 @@ fun ProductDetailsContent(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                InfoChip(label = stringResource(id = R.string.category), value = product.category)
-                InfoChip(label = stringResource(id = R.string.origin), value = product.origin)
+                InfoChip(label = stringResource(R.string.category), value = product.category)
+                InfoChip(label = stringResource(R.string.origin), value = product.origin)
             }
 
             StockBadge(stock = product.stock)
@@ -245,7 +249,7 @@ fun ProductDetailsContent(
             Divider()
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = stringResource(id = R.string.product_description),
+                text = stringResource(R.string.product_description),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -257,16 +261,16 @@ fun ProductDetailsContent(
             Spacer(modifier = Modifier.height(12.dp))
             Divider()
             Text(
-                text = stringResource(id = R.string.product_information),
+                text = stringResource(R.string.product_information),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
-            InfoRow(label = stringResource(id = R.string.brand), value = product.brand)
-            InfoRow(label = stringResource(id = R.string.category), value = product.category)
-            InfoRow(label = stringResource(id = R.string.origin), value = product.origin)
+            InfoRow(label = stringResource(R.string.brand), value = product.brand)
+            InfoRow(label = stringResource(R.string.category), value = product.category)
+            InfoRow(label = stringResource(R.string.origin), value = product.origin)
             InfoRow(
-                label = stringResource(id = R.string.stock_label),
-                value = if (product.stock > 0) stringResource(id = R.string.stock_count, product.stock) else stringResource(id = R.string.out_of_stock)
+                label = stringResource(R.string.stock_label),
+                value = if (product.stock > 0) stringResource(R.string.stock_count, product.stock) else stringResource(R.string.out_of_stock)
             )
         }
 
@@ -288,9 +292,9 @@ private fun AddToCartBar(onAddToCart: () -> Unit) {
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp)
         ) {
-            Icon(Icons.Default.AddShoppingCart, contentDescription = stringResource(id = R.string.add_to_cart))
+            Icon(Icons.Default.AddShoppingCart, contentDescription = stringResource(R.string.add_to_cart))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(text = stringResource(id = R.string.add_to_cart), fontSize = 16.sp)
+            Text(text = stringResource(R.string.add_to_cart_full), fontSize = 16.sp)
         }
     }
 }
