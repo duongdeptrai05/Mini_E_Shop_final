@@ -69,4 +69,34 @@
     <!-- Favorites Screen -->
     <string name="favorite_products">Sản phẩm yêu thích</string>
     <string name="no_favorite_products">Bạn chưa có sản phẩm yêu thích nào.</string>
+
+    <!-- Cart Screen -->
+    <string name="cart_title">Giỏ hàng của bạn</string>
+    <string name="cart_empty">Giỏ hàng của bạn đang trống.</string>
+    <string name="cart_remove_item">Xóa</string>
+    <string name="cart_add_item">Thêm</string>
+    <string name="cart_select_all">Tất cả</string>
+    <string name="cart_total_payment">Tổng thanh toán</string>
+    <string name="cart_checkout">Thanh toán</string>
+    <string name="cart_buy_now">Mua hàng (%d)</string>
+
+    <!-- Contact Screen -->
+    <string name="contact_screen_title">Nhân viên hỗ trợ</string>
+    <string name="contact_avatar_description">Ảnh đại diện</string>
+    <string name="contact_consultant_title">Nhân viên tư vấn</string>
+    <string name="contact_technical_support_title">Hỗ trợ kỹ thuật</string>
+    <string name="contact_order_manager_title">Quản lý đơn hàng</string>
+
+    <!-- Support Screen -->
+    <string name="support_greeting">Xin chào! Shop có thể giúp gì cho bạn?</string>
+    <string name="support_photo_taken">Đã chụp ảnh!</string>
+    <string name="support_camera_permission_denied">Quyền truy cập camera bị từ chối.</string>
+    <string name="support_chat_title">Chăm sóc khách hàng</string>
+    <string name="support_contact_icon">Liên hệ</string>
+    <string name="support_feature_in_development">Tính năng đang được phát triển</string>
+    <string name="support_avatar">Ảnh đại diện</string>
+    <string name="support_emoji_icon">Biểu tượng cảm xúc</string>
+    <string name="support_attach_image_icon">Đính kèm hình ảnh</string>
+    <string name="support_message_placeholder">Nhập tin nhắn...</string>
+    <string name="support_send_icon">Gửi</string>
 </resources>

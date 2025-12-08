@@ -69,4 +69,34 @@
     <!-- Favorites Screen -->
     <string name="favorite_products">Favorite Products</string>
     <string name="no_favorite_products">You don\'t have any favorite products yet.</string>
+
+    <!-- Cart Screen -->
+    <string name="cart_title">Your Cart</string>
+    <string name="cart_empty">Your cart is empty.</string>
+    <string name="cart_remove_item">Remove</string>
+    <string name="cart_add_item">Add</string>
+    <string name="cart_select_all">Select All</string>
+    <string name="cart_total_payment">Total Payment</string>
+    <string name="cart_checkout">Checkout</string>
+    <string name="cart_buy_now">Buy now (%d)</string>
+
+    <!-- Contact Screen -->
+    <string name="contact_screen_title">Support Staff</string>
+    <string name="contact_avatar_description">Avatar</string>
+    <string name="contact_consultant_title">Consultant</string>
+    <string name="contact_technical_support_title">Technical Support</string>
+    <string name="contact_order_manager_title">Order Manager</string>
+
+    <!-- Support Screen -->
+    <string name="support_greeting">Hello! How can the shop assist you?</string>
+    <string name="support_photo_taken">Photo taken!</string>
+    <string name="support_camera_permission_denied">Camera permission denied.</string>
+    <string name="support_chat_title">Customer Support</string>
+    <string name="support_contact_icon">Contact</string>
+    <string name="support_feature_in_development">This feature is under development</string>
+    <string name="support_avatar">Avatar</string>
+    <string name="support_emoji_icon">Emoji</string>
+    <string name="support_attach_image_icon">Attach image</string>
+    <string name="support_message_placeholder">Enter message...</string>
+    <string name="support_send_icon">Send</string>
 </resources>

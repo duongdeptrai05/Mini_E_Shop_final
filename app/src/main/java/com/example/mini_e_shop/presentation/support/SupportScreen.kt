@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.launch
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,16 +27,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.mini_e_shop.R
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-// Dummy data class for chat messages
-data class Message(val text: String, val isFromUser: Boolean, val showAvatar: Boolean)
+// Updated data class to support string resources
+data class Message(
+    val text: String? = null,
+    @StringRes val textResId: Int? = null,
+    val isFromUser: Boolean,
+    val showAvatar: Boolean
+) {
+    init {
+        require(text != null || textResId != null) { "Either text or textResId must be provided" }
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -47,48 +59,48 @@ fun SupportScreen(
     var messageText by remember { mutableStateOf("") }
     val messages = remember {
         mutableStateListOf(
-            Message("Xin chào! Shop có thể giúp gì cho bạn?", isFromUser = false, showAvatar = true),
+            Message(textResId = R.string.support_greeting, isFromUser = false, showAvatar = true),
         )
     }
     val context = LocalContext.current
     var showEmojiPicker by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    // Launcher để chụp ảnh. Kết quả trả về là một Bitmap.
+    // Launcher to take a picture. The result is a Bitmap.
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicturePreview()
     ) { bitmap: Bitmap? ->
         if (bitmap != null) {
-            // TODO: Xử lý ảnh bitmap (ví dụ: hiển thị trong chat, tải lên server)
-            Toast.makeText(context, "Đã chụp ảnh!", Toast.LENGTH_SHORT).show()
+            // TODO: Handle the bitmap image (e.g., display in chat, upload to server)
+            Toast.makeText(context, context.getString(R.string.support_photo_taken), Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Launcher để yêu cầu quyền.
+    // Launcher to request permission.
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            // Quyền đã được cấp, khởi chạy camera
+            // Permission is granted, launch the camera
             cameraLauncher.launch()
         } else {
-            // Quyền bị từ chối
-            Toast.makeText(context, "Quyền truy cập camera bị từ chối.", Toast.LENGTH_SHORT).show()
+            // Permission denied
+            Toast.makeText(context, context.getString(R.string.support_camera_permission_denied), Toast.LENGTH_SHORT).show()
         }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Chăm sóc khách hàng", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(id = R.string.support_chat_title), fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Default.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 },
                 actions = {
                     IconButton(onClick = onNavigateToContact) {
-                        Icon(Icons.Default.SupportAgent, contentDescription = "Contact")
+                        Icon(Icons.Default.SupportAgent, contentDescription = stringResource(id = R.string.support_contact_icon))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -128,11 +140,11 @@ fun SupportScreen(
                 onMessageChange = { messageText = it },
                 onSendClick = {
                     if (messageText.isNotBlank()) {
-                        messages.add(Message(messageText, isFromUser = true, showAvatar = false))
+                        messages.add(Message(text = messageText, isFromUser = true, showAvatar = false))
                         messageText = ""
                         scope.launch {
                             delay(1000) // Add a 1-second delay
-                            messages.add(Message("Tính năng đang được phát triển", isFromUser = false, showAvatar = true))
+                            messages.add(Message(textResId = R.string.support_feature_in_development, isFromUser = false, showAvatar = true))
                         }
                     }
                 },
@@ -181,7 +193,7 @@ fun MessageBubble(message: Message) {
         if (!message.isFromUser && message.showAvatar) {
             Image(
                 imageVector = Icons.Default.Person,
-                contentDescription = "Avatar",
+                contentDescription = stringResource(id = R.string.support_avatar),
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
@@ -202,8 +214,9 @@ fun MessageBubble(message: Message) {
                 .padding(12.dp)
                 .weight(1f, fill = false)
         ) {
+            val messageText = message.text ?: stringResource(id = message.textResId!!)
             Text(
-                text = message.text,
+                text = messageText,
                 color = if (message.isFromUser) Color.White else Color.Black
             )
         }
@@ -228,17 +241,17 @@ fun MessageInputBar(
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onEmojiClick) {
-            Icon(Icons.Outlined.SentimentSatisfied, contentDescription = "Emoji", tint = Color.Gray)
+            Icon(Icons.Outlined.SentimentSatisfied, contentDescription = stringResource(id = R.string.support_emoji_icon), tint = Color.Gray)
         }
         IconButton(onClick = onCameraClick) {
-            Icon(Icons.Default.CameraAlt, contentDescription = "Attach image", tint = Color.Gray)
+            Icon(Icons.Default.CameraAlt, contentDescription = stringResource(id = R.string.support_attach_image_icon), tint = Color.Gray)
         }
 
         TextField(
             value = messageText,
             onValueChange = onMessageChange,
             modifier = Modifier.weight(1f),
-            placeholder = { Text("Nhập tin nhắn...") },
+            placeholder = { Text(stringResource(id = R.string.support_message_placeholder)) },
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
@@ -250,7 +263,7 @@ fun MessageInputBar(
         )
 
         IconButton(onClick = onSendClick) {
-            Icon(Icons.Default.Send, contentDescription = "Send", tint = Color(0xFF007AFF))
+            Icon(Icons.Default.Send, contentDescription = stringResource(id = R.string.support_send_icon), tint = Color(0xFF007AFF))
         }
     }
 }
