@@ -28,6 +28,10 @@ fun MainScreen(
 ) {
     // NavController này chỉ dành cho 4 tab bottom
     val bottomNavController = rememberNavController()
+    
+    // Debug: Kiểm tra giá trị isAdmin
+    android.util.Log.d("MainScreen", "isAdmin from mainUiState: ${mainUiState.isAdmin}")
+    android.util.Log.d("MainScreen", "currentUser: ${currentUser?.email}, isAdmin: ${currentUser?.isAdmin}")
 
     Scaffold(
         bottomBar = {

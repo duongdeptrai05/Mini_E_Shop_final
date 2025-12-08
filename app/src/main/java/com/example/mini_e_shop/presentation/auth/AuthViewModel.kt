@@ -95,9 +95,14 @@ class AuthViewModel @Inject constructor(
         }
         .map { userEntity ->
             val isAdmin = userEntity?.isAdmin ?: false
+            // Debug logging để kiểm tra quyền admin
+            if (userEntity != null) {
+                println("AuthViewModel: User ${userEntity.id} - Email: ${userEntity.email} - isAdmin: ${userEntity.isAdmin}")
+            } else {
+                println("AuthViewModel: userEntity is null")
+            }
             // Dù userEntity là null hay không, chúng ta đều gói nó trong Success state
-            // Lỗi ở đây sẽ hết vì chúng ta không còn truy cập `role` nữa
-            MainUiState.Success( userEntity, userEntity?.isAdmin ?: false)
+            MainUiState.Success( userEntity, isAdmin)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MainUiState.Loading)
 

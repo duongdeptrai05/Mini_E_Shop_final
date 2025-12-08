@@ -43,9 +43,10 @@ import javax.inject.Singleton
 
 // Custom Callback class to break the circular dependency
 class DatabaseCallback @Inject constructor(
-//    private val userDao: Provider<UserDao>,
-//    private val productDao: Provider<ProductDao>,
+    private val userDao: Provider<UserDao>,
+    private val productDao: Provider<ProductDao>,
     private val firestore: Provider<FirebaseFirestore>,
+    private val firebaseAuth: Provider<FirebaseAuth>,
     private val applicationScope: CoroutineScope
 ) : RoomDatabase.Callback() {
     override fun onCreate(db: SupportSQLiteDatabase) {
@@ -53,47 +54,179 @@ class DatabaseCallback @Inject constructor(
 
         // Use the injected scope to launch the coroutine
         applicationScope.launch {
-//            createAdminAccount()
+            createAdminAccount()
+            seedProductsToRoom()
             seedProductsToFirestore()
+        }
+    }
+    
+    // Tạo tài khoản admin và lưu vào Room và Firebase
+    private fun createAdminAccount() {
+        val adminEmail = "admin@eshop.com"
+        val adminPassword = "admin123456"
+        val adminName = "Administrator"
+        
+        applicationScope.launch {
+            try {
+                // Kiểm tra xem admin đã tồn tại trong Room chưa
+                val existingAdmin = userDao.get().getUserByEmail(adminEmail)
+                if (existingAdmin != null && existingAdmin.isAdmin) {
+                    println("Admin account already exists in Room database.")
+                    // Đảm bảo admin cũng có trong Firestore
+                    firestore.get().collection("users").document(existingAdmin.id)
+                        .set(existingAdmin)
+                        .addOnSuccessListener {
+                            println("Admin account synced to Firestore.")
+                        }
+                    return@launch
+                }
+                
+                // Nếu chưa có trong Room, thử tạo mới trong Firebase Auth
+                firebaseAuth.get().createUserWithEmailAndPassword(adminEmail, adminPassword)
+                    .addOnCompleteListener { createTask ->
+                        if (createTask.isSuccessful) {
+                            // Tạo thành công trong Firebase Auth
+                            val firebaseUser = createTask.result?.user
+                            if (firebaseUser != null) {
+                                val adminEntity = com.example.mini_e_shop.data.local.entity.UserEntity(
+                                    id = firebaseUser.uid,
+                                    email = adminEmail,
+                                    name = adminName,
+                                    isAdmin = true
+                                )
+                                
+                                // Lưu vào Room
+                                applicationScope.launch {
+                                    userDao.get().insertUser(adminEntity)
+                                    println("Admin account created in Room database.")
+                                }
+                                
+                                // Lưu vào Firestore
+                                firestore.get().collection("users").document(firebaseUser.uid)
+                                    .set(adminEntity)
+                                    .addOnSuccessListener {
+                                        println("Admin account created in Firestore.")
+                                    }
+                                    .addOnFailureListener { e ->
+                                        println("Error creating admin in Firestore: $e")
+                                    }
+                            }
+                        } else {
+                            // Có thể admin đã tồn tại trong Firebase Auth nhưng chưa có trong Room
+                            val errorMessage = createTask.exception?.message ?: ""
+                            if (errorMessage.contains("already exists", ignoreCase = true) ||
+                                errorMessage.contains("already in use", ignoreCase = true) ||
+                                errorMessage.contains("email-already-in-use", ignoreCase = true)) {
+                                
+                                // Thử đăng nhập để lấy thông tin admin
+                                firebaseAuth.get().signInWithEmailAndPassword(adminEmail, adminPassword)
+                                    .addOnCompleteListener { signInTask ->
+                                        if (signInTask.isSuccessful) {
+                                            val firebaseUser = signInTask.result?.user
+                                            if (firebaseUser != null) {
+                                                val adminEntity = com.example.mini_e_shop.data.local.entity.UserEntity(
+                                                    id = firebaseUser.uid,
+                                                    email = adminEmail,
+                                                    name = adminName,
+                                                    isAdmin = true
+                                                )
+                                                
+                                                // Lưu vào Room
+                                                applicationScope.launch {
+                                                    userDao.get().insertUser(adminEntity)
+                                                    println("Admin account synced to Room database.")
+                                                }
+                                                
+                                                // Lưu vào Firestore
+                                                firestore.get().collection("users").document(firebaseUser.uid)
+                                                    .set(adminEntity)
+                                                    .addOnSuccessListener {
+                                                        println("Admin account synced to Firestore.")
+                                                    }
+                                                    .addOnFailureListener { e ->
+                                                        println("Error syncing admin to Firestore: $e")
+                                                    }
+                                            }
+                                        } else {
+                                            println("Error signing in admin: ${signInTask.exception?.message}")
+                                        }
+                                    }
+                            } else {
+                                println("Error creating admin account in Firebase Auth: ${createTask.exception?.message}")
+                            }
+                        }
+                    }
+            } catch (e: Exception) {
+                println("Error checking/admin account: $e")
+            }
+        }
+    }
+    
+    // Seed 41 sản phẩm vào Room database
+    private suspend fun seedProductsToRoom() {
+        try {
+            val productCount = productDao.get().getProductCount()
+            if (productCount == 0) {
+                println("Room: Seeding ${SampleData.getSampleProducts().size} products to Room database...")
+                productDao.get().upsertProducts(SampleData.getSampleProducts())
+                println("Room: Successfully seeded products to Room database.")
+            } else {
+                println("Room: Database already contains $productCount products. No seeding needed.")
+            }
+        } catch (e: Exception) {
+            println("Room: Error seeding products: $e")
         }
     }
     private fun seedProductsToFirestore() {
         val productCollection = firestore.get().collection("products")
-
-        // Kiểm tra xem collection "products" đã có dữ liệu chưa để tránh ghi đè
-        productCollection.limit(1).get().addOnCompleteListener { task ->
-            if (task.isSuccessful && task.result?.isEmpty == true) {
-                // Nếu collection rỗng, bắt đầu gieo dữ liệu
-                println("Firestore: Seeding products...")
-                val sampleProducts = SampleData.getSampleProducts()
-                val batch = firestore.get().batch()
-
-                sampleProducts.forEach { productEntity ->
-                    // Chuyển đổi từ ProductEntity sang một Map để ghi lên Firestore
-                    val productData = hashMapOf(
-                        "name" to productEntity.name,
-                        "brand" to productEntity.brand,
-                        "category" to productEntity.category,
-                        "origin" to productEntity.origin,
-                        "price" to productEntity.price,
-                        "stock" to productEntity.stock,
-                        "imageUrl" to productEntity.imageUrl,
-                        "description" to productEntity.description
-                    )
-                    // Dùng ID từ SampleData làm Document ID trên Firestore
-                    val docRef = productCollection.document(productEntity.id)
-                    batch.set(docRef, productData)
-                }
-
-                batch.commit().addOnSuccessListener {
-                    println("Firestore: Successfully seeded ${sampleProducts.size} products.")
-                }.addOnFailureListener { e ->
-                    println("Firestore: Error seeding products: $e")
-                }
-            } else {
-                println("Firestore: Products collection already contains data. No seeding needed.")
+        val sampleProducts = SampleData.getSampleProducts()
+        
+        println("Firestore: Starting to seed/update ${sampleProducts.size} products...")
+        
+        // Chia nhỏ batch để tránh vượt quá giới hạn 500 operations
+        val batchSize = 500
+        val batches = sampleProducts.chunked(batchSize)
+        
+        fun processBatch(batchIndex: Int) {
+            if (batchIndex >= batches.size) {
+                println("Firestore: Successfully seeded/updated all ${sampleProducts.size} products.")
+                return
             }
+            
+            val batch = firestore.get().batch()
+            val currentBatch = batches[batchIndex]
+            
+            currentBatch.forEach { productEntity ->
+                // Chuyển đổi từ ProductEntity sang một Map để ghi lên Firestore
+                val productData = hashMapOf(
+                    "name" to productEntity.name,
+                    "brand" to productEntity.brand,
+                    "category" to productEntity.category,
+                    "origin" to productEntity.origin,
+                    "price" to productEntity.price,
+                    "stock" to productEntity.stock,
+                    "imageUrl" to productEntity.imageUrl,
+                    "description" to productEntity.description
+                )
+                // Dùng ID từ SampleData làm Document ID trên Firestore
+                // Sử dụng set() với merge để update nếu đã tồn tại, tạo mới nếu chưa có
+                val docRef = productCollection.document(productEntity.id)
+                batch.set(docRef, productData, com.google.firebase.firestore.SetOptions.merge())
+            }
+            
+            batch.commit()
+                .addOnSuccessListener {
+                    println("Firestore: Batch ${batchIndex + 1}/${batches.size} completed (${currentBatch.size} products).")
+                    // Xử lý batch tiếp theo
+                    processBatch(batchIndex + 1)
+                }
+                .addOnFailureListener { e ->
+                    println("Firestore: Error seeding batch ${batchIndex + 1}: $e")
+                }
         }
+        
+        // Bắt đầu xử lý batch đầu tiên
+        processBatch(0)
     }
 
 

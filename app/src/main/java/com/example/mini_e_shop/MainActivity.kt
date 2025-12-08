@@ -30,6 +30,7 @@ import com.example.mini_e_shop.presentation.product_detail.ProductDetailScreen
 import com.example.mini_e_shop.presentation.register.RegisterScreen
 import com.example.mini_e_shop.presentation.settings.SettingsScreen
 import com.example.mini_e_shop.presentation.support.SupportScreen
+import com.example.mini_e_shop.base.MyApplication
 import com.example.mini_e_shop.ui.theme.Mini_E_ShopTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -39,6 +40,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Seed/update products to Firebase khi app khởi động
+        // Có thể comment dòng này sau khi đã seed xong để tránh update mỗi lần
+        (application as? MyApplication)?.seedProductsToFirestore()
         setContent {
             Mini_E_ShopTheme {
                 val authViewModel = hiltViewModel<AuthViewModel>()

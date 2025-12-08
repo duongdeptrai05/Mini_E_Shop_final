@@ -80,11 +80,46 @@ class ProductRepositoryImpl @Inject constructor(
     }
 
     override suspend fun upsertProduct(product: Product) {
+        // Lưu vào Room database trước
         productDao.upsertProduct(product.toEntity())
+        
+        // Sau đó lưu lên Firebase
+        val productData = hashMapOf(
+            "name" to product.name,
+            "brand" to product.brand,
+            "category" to product.category,
+            "origin" to product.origin,
+            "price" to product.price,
+            "stock" to product.stock,
+            "imageUrl" to product.imageUrl,
+            "description" to product.description
+        )
+        
+        firestore.collection("products")
+            .document(product.id)
+            .set(productData, com.google.firebase.firestore.SetOptions.merge())
+            .addOnSuccessListener {
+                println("Firestore: Successfully saved product ${product.id} to Firebase.")
+            }
+            .addOnFailureListener { e ->
+                println("Firestore: Error saving product ${product.id} to Firebase: $e")
+            }
     }
 
     override suspend fun deleteProduct(product: Product) {
+        // Xóa khỏi Room database trước
         productDao.deleteProduct(product.toEntity())
+        
+        // Sau đó xóa khỏi Firebase
+        firestore.collection("products")
+            .document(product.id)
+            .delete()
+            .addOnSuccessListener {
+                println("Firestore: Successfully deleted product ${product.id} from Firebase.")
+            }
+            .addOnFailureListener { e ->
+                println("Firestore: Error deleting product ${product.id} from Firebase: $e")
+            }
     }
 
     override suspend fun updateProductStock(productId: String, newStock: Int) {

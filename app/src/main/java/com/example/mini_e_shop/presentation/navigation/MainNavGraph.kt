@@ -33,6 +33,8 @@ fun MainNavGraph(
         modifier = modifier
     ) {
         composable(Screen.Home.route) {
+            // Debug logging
+            android.util.Log.d("MainNavGraph", "ProductListScreen - isAdmin: $isAdmin")
             ProductListScreen(
                 viewModel = hiltViewModel(),
                 isAdmin = isAdmin,

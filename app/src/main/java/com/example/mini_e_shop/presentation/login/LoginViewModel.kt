@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 @HiltViewModel
@@ -91,8 +92,55 @@ class LoginViewModel @Inject constructor(
                                         email = email,
                                         rememberMe = _rememberMe.value
                                     )
-                                    // 4. Lấy thông tin chi tiết của user từ Room (tùy chọn)
-                                    val userEntity = userRepository.getUserById(userId)
+                                    
+                                    // 4. Luôn sync từ Firestore để đảm bảo isAdmin được cập nhật đúng
+                                    val firestore = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                                    var userEntity: UserEntity? = null
+                                    
+                                    try {
+                                        val snapshot = firestore.collection("users").document(userId).get().await()
+                                        if (snapshot.exists()) {
+                                            val data = snapshot.data
+                                            if (data != null) {
+                                                userEntity = com.example.mini_e_shop.data.local.entity.UserEntity(
+                                                    id = snapshot.id,
+                                                    email = data["email"] as? String ?: email,
+                                                    name = data["name"] as? String ?: "",
+                                                    isAdmin = (data["isAdmin"] as? Boolean) ?: false
+                                                )
+                                                // Lưu vào Room để đảm bảo đồng bộ
+                                                userRepository.registerUser(userEntity)
+                                                println("LoginViewModel: User synced from Firestore to Room. Email: ${userEntity.email}, isAdmin: ${userEntity.isAdmin}")
+                                            }
+                                        } else {
+                                            // Nếu không có trong Firestore, lấy từ Room hoặc tạo mới
+                                            userEntity = userRepository.getUserById(userId)
+                                            if (userEntity == null) {
+                                                // Tạo user mới với isAdmin = false
+                                                userEntity = com.example.mini_e_shop.data.local.entity.UserEntity(
+                                                    id = userId,
+                                                    email = email,
+                                                    name = email.split("@")[0], // Dùng phần trước @ làm tên mặc định
+                                                    isAdmin = false
+                                                )
+                                                userRepository.registerUser(userEntity)
+                                            }
+                                        }
+                                    } catch (e: Exception) {
+                                        println("LoginViewModel: Error fetching user from Firestore: $e")
+                                        // Nếu lỗi, lấy từ Room
+                                        userEntity = userRepository.getUserById(userId)
+                                        if (userEntity == null) {
+                                            // Tạo user mới nếu không có trong Room
+                                            userEntity = com.example.mini_e_shop.data.local.entity.UserEntity(
+                                                id = userId,
+                                                email = email,
+                                                name = email.split("@")[0],
+                                                isAdmin = false
+                                            )
+                                            userRepository.registerUser(userEntity)
+                                        }
+                                    }
 
                                     _loginState.value = LoginState.Success(userEntity)
                                     // Gửi sự kiện để điều hướng đến màn hình chính
