@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import com.example.mini_e_shop.R
 import com.example.mini_e_shop.data.local.entity.UserEntity
 import com.example.mini_e_shop.ui.theme.*
-
+import androidx.compose.material.icons.outlined.FavoriteBorder
 @Composable
 fun ProfileScreen(
     currentUser: UserEntity?,
@@ -136,7 +136,7 @@ private fun Menu(
 ) {
     Column(modifier = Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         MenuButton(text = stringResource(id = R.string.my_orders), icon = Icons.Default.ReceiptLong, onClick = onNavigateToOrders)
-        MenuButton(text = stringResource(id = R.string.purchase_history), icon = Icons.Default.History, onClick = onNavigateToFavorites)
+        MenuButton(text = stringResource(id = R.string.favorites), icon = Icons.Outlined.FavoriteBorder, onClick = onNavigateToFavorites)
         MenuButton(text = stringResource(id = R.string.settings), icon = Icons.Default.Settings, onClick = onNavigateToSettings)
     }
 }
@@ -146,7 +146,7 @@ private fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
     // Màu sắc riêng cho từng menu item
     val iconColor = when (text) {
         stringResource(id = R.string.my_orders) -> CartColor
-        stringResource(id = R.string.purchase_history) -> PrimaryIndigo
+        stringResource(id = R.string.favorites) -> Color.Red
         stringResource(id = R.string.settings) -> PrimaryIndigo
         else -> ProfileColor
     }
