@@ -20,6 +20,10 @@ class UserRepositoryImpl @Inject constructor(
     private val preferencesManager: UserPreferencesManager,
     private val firestore: FirebaseFirestore
 ) : UserRepository {
+
+    companion object {
+        private const val DEFAULT_ADMIN_EMAIL = "admin@eshop.com"
+    }
     
     private val repositoryScope = kotlinx.coroutines.CoroutineScope(
         kotlinx.coroutines.Dispatchers.IO + kotlinx.coroutines.SupervisorJob()
@@ -58,17 +62,23 @@ class UserRepositoryImpl @Inject constructor(
                                     val data = snapshot.data
                                     if (data != null) {
                                         val isAdminValue = data["isAdmin"]
-                                        val isAdmin = when {
+                                        var isAdmin = when {
                                             isAdminValue is Boolean -> isAdminValue
                                             isAdminValue is Number -> isAdminValue.toInt() != 0
                                             else -> false
+                                        }
+
+                                        // Fallback: nếu email trùng admin seed mà thiếu cờ
+                                        val email = data["email"] as? String ?: ""
+                                        if (!isAdmin && email.equals(DEFAULT_ADMIN_EMAIL, ignoreCase = true)) {
+                                            isAdmin = true
                                         }
                                         
                                         android.util.Log.d("UserRepositoryImpl", "Firestore data - isAdmin raw: $isAdminValue, converted: $isAdmin")
                                         
                                         val userEntity = UserEntity(
                                             id = snapshot.id,
-                                            email = data["email"] as? String ?: "",
+                                            email = email,
                                             name = data["name"] as? String ?: "",
                                             isAdmin = isAdmin
                                         )
@@ -120,17 +130,22 @@ class UserRepositoryImpl @Inject constructor(
                     val data = snapshot.data
                     if (data != null) {
                         val isAdminValue = data["isAdmin"]
-                        val isAdmin = when {
+                        var isAdmin = when {
                             isAdminValue is Boolean -> isAdminValue
                             isAdminValue is Number -> isAdminValue.toInt() != 0
                             else -> false
+                        }
+
+                        val email = data["email"] as? String ?: ""
+                        if (!isAdmin && email.equals(DEFAULT_ADMIN_EMAIL, ignoreCase = true)) {
+                            isAdmin = true
                         }
                         
                         android.util.Log.d("UserRepositoryImpl", "observeUserById - Firestore data - isAdmin raw: $isAdminValue, converted: $isAdmin")
                         
                         val userEntity = UserEntity(
                             id = snapshot.id,
-                            email = data["email"] as? String ?: "",
+                            email = email,
                             name = data["name"] as? String ?: "",
                             isAdmin = isAdmin
                         )

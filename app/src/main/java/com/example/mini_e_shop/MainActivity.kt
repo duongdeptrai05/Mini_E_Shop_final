@@ -168,7 +168,7 @@ class MainActivity : ComponentActivity() {
                                                 }
                                                 composable(
                                                     route = "${Screen.ProductDetail.route}/{productId}",
-                                                    arguments = listOf(navArgument("productId") { type = NavType.IntType })
+                                                    arguments = listOf(navArgument("productId") { type = NavType.StringType })
                                                 ) {
                                                     ProductDetailScreen(
                                                         onBack = { navController.popBackStack() }

@@ -30,6 +30,8 @@ import com.example.mini_e_shop.R
 import com.example.mini_e_shop.domain.model.Product
 import com.example.mini_e_shop.ui.theme.PrimaryBlue
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -42,6 +44,7 @@ fun ProductDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val successState = uiState as? ProductDetailUiState.Success
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         contentWindowInsets = WindowInsets.statusBars, // Chừa khoảng cách cho status bar
@@ -60,7 +63,8 @@ fun ProductDetailScreen(
             successState?.let {
                 AddToCartBar(onAddToCart = { viewModel.onAddToCart(it.product) })
             }
-        }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { padding ->
         when (val state = uiState) {
             is ProductDetailUiState.Loading -> {
@@ -80,6 +84,17 @@ fun ProductDetailScreen(
                     product = state.product,
                     modifier = Modifier.padding(padding)
                 )
+            }
+
+            is ProductDetailUiState.Added -> {
+                ProductDetailsContent(
+                    product = state.product,
+                    modifier = Modifier.padding(padding)
+                )
+                LaunchedEffect(state) {
+                    snackbarHostState.showSnackbar(state.message)
+                    viewModel.resetToSuccess(state.product)
+                }
             }
 
             is ProductDetailUiState.Error -> {

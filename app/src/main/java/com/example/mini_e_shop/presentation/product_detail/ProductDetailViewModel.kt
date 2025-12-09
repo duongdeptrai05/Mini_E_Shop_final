@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.firstOrNull
 sealed class ProductDetailUiState {
     data object Loading : ProductDetailUiState()
     data class Success(val product: Product) : ProductDetailUiState()
+    data class Added(val product: Product, val message: String) : ProductDetailUiState()
     data class Error(val message: String) : ProductDetailUiState()
 }
 
@@ -68,13 +69,20 @@ class ProductDetailViewModel @Inject constructor(
                     // Gọi hàm với đầy đủ 2 tham số: product và userId
                     cartRepository.addProductToCart(product, currentUser.id)
 
-                    // TODO: Gửi sự kiện báo thành công
+                    _uiState.value = ProductDetailUiState.Added(
+                        product = product,
+                        message = "Đã thêm ${product.name} vào giỏ hàng"
+                    )
                 } else {
-                    // TODO: Xử lý trường hợp không tìm thấy người dùng (ví dụ: đã bị logout)
+                    _uiState.value = ProductDetailUiState.Error("Vui lòng đăng nhập để thêm giỏ hàng")
                 }
             } catch (e: Exception){
-                // TODO: Xử lý lỗi
+                _uiState.value = ProductDetailUiState.Error("Lỗi khi thêm giỏ hàng: ${e.message}")
             }
         }
+    }
+
+    fun resetToSuccess(product: Product) {
+        _uiState.value = ProductDetailUiState.Success(product)
     }
 }

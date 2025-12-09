@@ -23,6 +23,11 @@ class LoginViewModel @Inject constructor(
     private val firebaseAuth: FirebaseAuth
 ) : ViewModel() {
 
+    companion object {
+        // Email admin mặc định đã seed trong AppModule
+        private const val DEFAULT_ADMIN_EMAIL = "admin@eshop.com"
+    }
+
     private val _usernameOrEmail = MutableStateFlow("")
     val usernameOrEmail = _usernameOrEmail.asStateFlow()
 
@@ -103,10 +108,15 @@ class LoginViewModel @Inject constructor(
                                             val data = snapshot.data
                                             if (data != null) {
                                                 val isAdminValue = data["isAdmin"]
-                                                val isAdmin = when {
+                                                var isAdmin = when {
                                                     isAdminValue is Boolean -> isAdminValue
                                                     isAdminValue is Number -> isAdminValue.toInt() != 0
                                                     else -> false
+                                                }
+
+                                                // Fallback: nếu là tài khoản admin seed nhưng thiếu cờ isAdmin trên Firestore
+                                                if (!isAdmin && email.equals(DEFAULT_ADMIN_EMAIL, ignoreCase = true)) {
+                                                    isAdmin = true
                                                 }
                                                 
                                                 android.util.Log.d("LoginViewModel", "Firestore data - isAdmin raw: $isAdminValue, converted: $isAdmin")
@@ -119,6 +129,11 @@ class LoginViewModel @Inject constructor(
                                                 )
                                                 // Lưu vào Room để đảm bảo đồng bộ
                                                 userRepository.registerUser(userEntity)
+                                                // Đồng bộ lại cờ isAdmin lên Firestore nếu cần
+                                                if (isAdmin) {
+                                                    firestore.collection("users").document(userId)
+                                                        .update("isAdmin", true)
+                                                }
                                                 android.util.Log.d("LoginViewModel", "User synced from Firestore to Room. Email: ${userEntity.email}, isAdmin: ${userEntity.isAdmin}")
                                                 println("LoginViewModel: User synced from Firestore to Room. Email: ${userEntity.email}, isAdmin: ${userEntity.isAdmin}")
                                             }
@@ -126,14 +141,19 @@ class LoginViewModel @Inject constructor(
                                             // Nếu không có trong Firestore, lấy từ Room hoặc tạo mới
                                             userEntity = userRepository.getUserById(userId)
                                             if (userEntity == null) {
-                                                // Tạo user mới với isAdmin = false
+                                                // Tạo user mới, gán admin nếu trùng email seed
+                                                val isAdmin = email.equals(DEFAULT_ADMIN_EMAIL, ignoreCase = true)
                                                 userEntity = com.example.mini_e_shop.data.local.entity.UserEntity(
                                                     id = userId,
                                                     email = email,
                                                     name = email.split("@")[0], // Dùng phần trước @ làm tên mặc định
-                                                    isAdmin = false
+                                                    isAdmin = isAdmin
                                                 )
                                                 userRepository.registerUser(userEntity)
+                                                if (isAdmin) {
+                                                    firestore.collection("users").document(userId)
+                                                        .set(userEntity)
+                                                }
                                             }
                                         }
                                     } catch (e: Exception) {
@@ -142,13 +162,19 @@ class LoginViewModel @Inject constructor(
                                         userEntity = userRepository.getUserById(userId)
                                         if (userEntity == null) {
                                             // Tạo user mới nếu không có trong Room
+                                            val isAdmin = email.equals(DEFAULT_ADMIN_EMAIL, ignoreCase = true)
                                             userEntity = com.example.mini_e_shop.data.local.entity.UserEntity(
                                                 id = userId,
                                                 email = email,
                                                 name = email.split("@")[0],
-                                                isAdmin = false
+                                                isAdmin = isAdmin
                                             )
                                             userRepository.registerUser(userEntity)
+                                            if (isAdmin) {
+                                                com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                                                    .collection("users").document(userId)
+                                                    .set(userEntity)
+                                            }
                                         }
                                     }
 
