@@ -102,8 +102,8 @@
 
     <!-- Orders Screen -->
     <string name="no_orders">Bạn chưa có đơn hàng nào.</string>
-    <string name="order_number">Đơn hàng #%1$d</string>
-    <string name="order_total">Tổng cộng: $%1$.2f</string>
+    <string name="order_number">Đơn hàng #%s</string>
+    <string name="order_total">Tổng cộng: %s</string>
 
     <!-- Contact Screen -->
     <string name="contact_screen_title">Nhân viên hỗ trợ</string>

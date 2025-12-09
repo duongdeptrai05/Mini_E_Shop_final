@@ -80,11 +80,38 @@ fun OrderRow(order: Order) {
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                Text(stringResource(R.string.order_number, order.id), fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Text(order.createdAt, color = Color.Gray, fontSize = 12.sp)
+                // SỬA 1: Chuyển order.id thành String an toàn
+                Text(
+                    text = stringResource(R.string.order_number, order.id.toString()),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+
+                // Kiểm tra null cho ngày tạo (nếu order.createdAt có thể null)
+                Text(
+                    text = order.createdAt ?: "Đang cập nhật", // Thêm giá trị mặc định
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Text(stringResource(R.string.order_total, order.totalAmount), color = PrimaryBlue, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+
+            // SỬA 2: Format tiền tệ thủ công thay vì dùng stringResource format số
+            // Điều này tránh crash nếu order.totalAmount bị null hoặc sai kiểu
+            val formattedTotal = try {
+                // Giả sử totalAmount là Double
+                "%,.0f đ".format(order.totalAmount)
+            } catch (e: Exception) {
+                "${order.totalAmount} đ"
+            }
+
+            Text(
+                // Bạn có thể sửa string.xml dòng order_total thành: "Tổng tiền: %s"
+                text = stringResource(R.string.order_total, formattedTotal),
+                color = PrimaryBlue,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp
+            )
         }
     }
 }
