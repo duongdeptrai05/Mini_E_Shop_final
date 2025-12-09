@@ -100,7 +100,7 @@ fun CartScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .background(BackgroundLight)
+                .background(MaterialTheme.colorScheme.background)
         ) {
             when (val currentState = state) {
                 is CartUiState.Loading -> {
@@ -144,7 +144,7 @@ fun CartItemRow(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp,
             pressedElevation = 4.dp
@@ -174,7 +174,7 @@ fun CartItemRow(
                     item.product.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(

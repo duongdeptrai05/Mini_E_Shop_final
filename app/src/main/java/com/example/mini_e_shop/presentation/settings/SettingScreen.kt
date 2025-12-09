@@ -49,6 +49,9 @@ fun SettingsScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val rememberedContext = remember { context }
+    val colors = MaterialTheme.colorScheme
+    val surfaceColor = colors.surface
+    val mutedTextColor = colors.onSurface.copy(alpha = 0.7f)
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showEditInfoDialog by remember { mutableStateOf(false) }
     var showPrivacyPolicyDialog by remember { mutableStateOf(false) }
@@ -114,11 +117,13 @@ fun SettingsScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.White
+                    containerColor = surfaceColor,
+                    titleContentColor = colors.onSurface,
+                    navigationIconContentColor = colors.onSurface
                 )
             )
         },
-        containerColor = Color(0xFFF3F4F6) // Background color for the whole screen
+        containerColor = colors.background
     ) { padding ->
         Column(
             modifier = Modifier
@@ -153,7 +158,7 @@ fun SettingsScreen(
                         Toast.makeText(rememberedContext, message, Toast.LENGTH_SHORT).show()
                     }
                 )
-                Divider(color = Color(0xFFF3F4F6), thickness = 1.dp)
+                Divider(color = colors.surfaceVariant, thickness = 1.dp)
 
                 // Language
                 SettingsTile(
@@ -163,7 +168,7 @@ fun SettingsScreen(
                     value = state.language,
                     onClick = { showLanguageDialog = true }
                 )
-                Divider(color = Color(0xFFF3F4F6), thickness = 1.dp)
+                Divider(color = colors.surfaceVariant, thickness = 1.dp)
 
                 // Dark Mode
                 SettingsSwitchTile(
@@ -187,7 +192,7 @@ fun SettingsScreen(
                     title = stringResource(id = R.string.privacy_policy),
                     onClick = { showPrivacyPolicyDialog = true }
                 )
-                Divider(color = Color(0xFFF3F4F6), thickness = 1.dp)
+                Divider(color = colors.surfaceVariant, thickness = 1.dp)
 
                 SettingsTile(
                     icon = Icons.Outlined.HelpOutline,
@@ -195,7 +200,7 @@ fun SettingsScreen(
                     title = stringResource(id = R.string.help),
                     onClick = { showHelpDialog = true }
                 )
-                Divider(color = Color(0xFFF3F4F6), thickness = 1.dp)
+                Divider(color = colors.surfaceVariant, thickness = 1.dp)
 
                 SettingsTile(
                     icon = Icons.Outlined.Info,
@@ -210,7 +215,7 @@ fun SettingsScreen(
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 Text(
                     text = "ShopMini Version 1.0.0",
-                    color = Color.Gray,
+                    color = mutedTextColor,
                     fontSize = 12.sp
                 )
             }
@@ -228,6 +233,9 @@ fun EditInfoDialog(
 ) {
     var name by remember { mutableStateOf(currentName) }
     var email by remember { mutableStateOf(currentEmail) }
+    val themeColors = MaterialTheme.colorScheme
+    val mutedTextColor = themeColors.onSurface.copy(alpha = 0.7f)
+    val surfaceColor = themeColors.surface
 
     DialogWithCloseButton(onDismiss = onDismiss) {
         Column(
@@ -239,7 +247,7 @@ fun EditInfoDialog(
             Text("Chỉnh sửa thông tin", fontWeight = FontWeight.Bold, fontSize = 18.sp)
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Tên của bạn", fontSize = 14.sp, color = Color.Gray)
+            Text("Tên của bạn", fontSize = 14.sp, color = mutedTextColor)
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = name,
@@ -247,14 +255,14 @@ fun EditInfoDialog(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFEEEEEE),
-                    focusedBorderColor = Color(0xFF6366F1)
+                    unfocusedBorderColor = themeColors.outline,
+                    focusedBorderColor = themeColors.primary
                 )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text("Email", fontSize = 14.sp, color = Color.Gray)
+            Text("Email", fontSize = 14.sp, color = mutedTextColor)
             Spacer(modifier = Modifier.height(4.dp))
             OutlinedTextField(
                 value = email,
@@ -262,8 +270,8 @@ fun EditInfoDialog(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedBorderColor = Color(0xFFEEEEEE),
-                    focusedBorderColor = Color(0xFF6366F1)
+                    unfocusedBorderColor = themeColors.outline,
+                    focusedBorderColor = themeColors.primary
                 )
             )
 
@@ -276,7 +284,10 @@ fun EditInfoDialog(
                         .weight(1f)
                         .height(48.dp),
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF3F4F6), contentColor = Color.Black),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = surfaceColor,
+                        contentColor = themeColors.onSurface
+                    ),
                     elevation = ButtonDefaults.buttonElevation(0.dp)
                 ) {
                     Text(stringResource(id = R.string.cancel), fontWeight = FontWeight.SemiBold)
@@ -375,7 +386,7 @@ fun PrivacyPolicyDialog(onDismiss: () -> Unit) {
 @Composable
 fun PolicyItem(icon: ImageVector, iconColor: Color, title: String, content: String) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
@@ -393,7 +404,7 @@ fun PolicyItem(icon: ImageVector, iconColor: Color, title: String, content: Stri
             Column {
                 Text(title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(content, color = Color.Gray, fontSize = 14.sp, lineHeight = 20.sp)
+                Text(content, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f), fontSize = 14.sp, lineHeight = 20.sp)
             }
         }
     }
@@ -405,9 +416,13 @@ fun HelpDialog(
     onDismiss: () -> Unit,
     onNavigateToLiveChat: () -> Unit
 ) {
+    val colorScheme = MaterialTheme.colorScheme
+    val muted = colorScheme.onSurface.copy(alpha = 0.7f)
+    val surface = colorScheme.surface
+
     FullScreenDialog(title = "Trợ giúp", onDismiss = onDismiss) {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            Text("Liên hệ với chúng tôi", fontWeight = FontWeight.SemiBold, color = Color.Gray)
+            Text("Liên hệ với chúng tôi", fontWeight = FontWeight.SemiBold, color = muted)
 
             ContactItem(
                 icon = Icons.Outlined.Phone,
@@ -426,9 +441,9 @@ fun HelpDialog(
             )
 
             Card(
-                colors = CardDefaults.cardColors(containerColor = Color.White),
+                colors = CardDefaults.cardColors(containerColor = surface),
                 shape = RoundedCornerShape(16.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, Color.Black),
+                border = androidx.compose.foundation.BorderStroke(1.dp, colorScheme.outline),
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable(onClick = onNavigateToLiveChat) // Thêm sự kiện click
@@ -448,10 +463,10 @@ fun HelpDialog(
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column(modifier = Modifier.weight(1f)) {
-                        Text("Live Chat", color = Color.Gray, fontSize = 12.sp)
+                        Text("Live Chat", color = muted, fontSize = 12.sp)
                         Text("Trò chuyện ngay", fontWeight = FontWeight.Bold, fontSize = 16.sp)
                     }
-                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color.Gray)
+                     Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = muted)
                 }
             }
 
@@ -479,7 +494,7 @@ fun HelpDialog(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-            Text("Câu hỏi thường gặp", fontWeight = FontWeight.SemiBold, color = Color.Gray)
+            Text("Câu hỏi thường gặp", fontWeight = FontWeight.SemiBold, color = muted)
 
             FAQItem(
                 question = "Làm sao để theo dõi đơn hàng?",
@@ -518,7 +533,7 @@ fun ContactItem(
     showArrow: Boolean = true
 ) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(2.dp),
         modifier = Modifier.fillMaxWidth()
@@ -538,11 +553,11 @@ fun ContactItem(
             }
             Spacer(modifier = Modifier.width(16.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, color = Color.Gray, fontSize = 12.sp)
-                Text(value, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(title, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f), fontSize = 12.sp)
+                Text(value, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
             }
             if (showArrow) {
-                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = Color.Gray)
+                Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f))
             }
         }
     }
@@ -553,7 +568,7 @@ fun FAQItem(question: String, answer: String) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(2.dp),
         modifier = Modifier
@@ -570,7 +585,7 @@ fun FAQItem(question: String, answer: String) {
                 Icon(
                     imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
-                    tint = Color.Gray
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
 
@@ -582,12 +597,12 @@ fun FAQItem(question: String, answer: String) {
             ) {
                 Column {
                     Spacer(modifier = Modifier.height(8.dp))
-                    HorizontalDivider(color = Color(0xFFEEEEEE))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = answer,
                         fontSize = 14.sp,
-                        color = Color.Gray,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                         lineHeight = 20.sp
                     )
                 }
@@ -601,7 +616,7 @@ fun DialogWithCloseButton(onDismiss: () -> Unit, content: @Composable () -> Unit
      androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
         Card(
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             modifier = Modifier.fillMaxWidth()
         ) {
             Box {
@@ -610,7 +625,11 @@ fun DialogWithCloseButton(onDismiss: () -> Unit, content: @Composable () -> Unit
                     onClick = onDismiss,
                     modifier = Modifier.align(Alignment.TopEnd)
                 ) {
-                    Icon(Icons.Outlined.Close, contentDescription = "Close", tint = Color.Gray)
+                    Icon(
+                        Icons.Outlined.Close,
+                        contentDescription = "Close",
+                        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
             }
         }
@@ -633,10 +652,14 @@ fun FullScreenDialog(title: String, onDismiss: () -> Unit, content: @Composable 
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
+                    )
                 )
             },
-            containerColor = Color(0xFFF3F4F6)
+            containerColor = MaterialTheme.colorScheme.background
         ) { padding ->
             Column(
                 modifier = Modifier
@@ -698,7 +721,7 @@ fun SettingsSection(
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = title,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             fontSize = 14.sp,
             modifier = Modifier.padding(start = 8.dp)
         )
@@ -706,7 +729,7 @@ fun SettingsSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             content()
         }
@@ -750,7 +773,7 @@ fun SettingsTile(
             text = title,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
         
@@ -758,7 +781,7 @@ fun SettingsTile(
             Text(
                 text = value,
                 fontSize = 14.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             )
             Spacer(modifier = Modifier.width(8.dp))
         }
@@ -766,7 +789,7 @@ fun SettingsTile(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
             contentDescription = null,
-            tint = Color.Gray
+            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
     }
 }
@@ -806,14 +829,14 @@ fun SettingsSwitchTile(
             text = title,
             fontSize = 16.sp,
             fontWeight = FontWeight.Medium,
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
         
         Text(
             text = if (checked) stringResource(id = R.string.on) else stringResource(id = R.string.off),
             fontSize = 14.sp,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
             modifier = Modifier.padding(end = 8.dp)
         )
 
@@ -821,10 +844,10 @@ fun SettingsSwitchTile(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = Color.White,
-                checkedTrackColor = Color(0xFF6366F1), // Primary Purple
-                uncheckedThumbColor = Color.White,
-                uncheckedTrackColor = Color.Gray.copy(alpha = 0.5f)
+                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                checkedTrackColor = MaterialTheme.colorScheme.primary,
+                uncheckedThumbColor = MaterialTheme.colorScheme.surface,
+                uncheckedTrackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
             ),
             modifier = Modifier.scale(0.8f) // Make switch slightly smaller to fit elegantly
         )

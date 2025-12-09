@@ -2,6 +2,7 @@ package com.example.mini_e_shop.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.mini_e_shop.data.preferences.ThemeOption
 import com.example.mini_e_shop.data.preferences.UserPreferencesManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,6 +37,7 @@ class SettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            // Sync language first
             val initialLanguageCode = userPreferencesManager.languageFlow.first()
             _state.update { it.copy(
                 languageCode = initialLanguageCode,
@@ -51,6 +53,15 @@ class SettingsViewModel @Inject constructor(
                 }
             }
         }
+
+        viewModelScope.launch {
+            val initialTheme = userPreferencesManager.themeOptionFlow.first()
+            _state.update { it.copy(darkModeEnabled = initialTheme == ThemeOption.DARK) }
+
+            userPreferencesManager.themeOptionFlow.collect { option ->
+                _state.update { it.copy(darkModeEnabled = option == ThemeOption.DARK) }
+            }
+        }
     }
 
     fun toggleNotifications(enabled: Boolean) {
@@ -58,6 +69,10 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun toggleDarkMode(enabled: Boolean) {
+        viewModelScope.launch {
+            val themeOption = if (enabled) ThemeOption.DARK else ThemeOption.LIGHT
+            userPreferencesManager.saveThemeOption(themeOption)
+        }
         _state.update { it.copy(darkModeEnabled = enabled) }
     }
 

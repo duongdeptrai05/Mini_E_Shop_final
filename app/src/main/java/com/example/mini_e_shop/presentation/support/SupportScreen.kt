@@ -106,10 +106,10 @@ fun SupportScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF007AFF),
-                    titleContentColor = Color.White,
-                    actionIconContentColor = Color.White,
-                    navigationIconContentColor = Color.White
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                 ),
                 windowInsets = WindowInsets.statusBars // Sử dụng statusBars để tự động tính toán padding
             )
@@ -123,7 +123,7 @@ fun SupportScreen(
             LazyColumn(
                 modifier = Modifier
                     .weight(1f)
-                    .background(Color(0xFFE5F3FF))
+                    .background(MaterialTheme.colorScheme.background)
                     .padding(horizontal = 16.dp),
                 reverseLayout = true
             ) {
@@ -169,7 +169,7 @@ fun EmojiPicker(onEmojiSelected: (String) -> Unit) {
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
@@ -200,7 +200,7 @@ fun MessageBubble(message: Message) {
                 modifier = Modifier
                     .size(40.dp)
                     .clip(CircleShape)
-                    .background(Color.Gray)
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
                     .align(Alignment.Bottom)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -211,7 +211,7 @@ fun MessageBubble(message: Message) {
         Box(
             modifier = Modifier
                 .background(
-                    if (message.isFromUser) Color(0xFF007AFF) else Color.White,
+                    if (message.isFromUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
                     RoundedCornerShape(20.dp)
                 )
                 .padding(12.dp)
@@ -220,7 +220,7 @@ fun MessageBubble(message: Message) {
             val messageText = message.text ?: stringResource(id = message.textResId!!)
             Text(
                 text = messageText,
-                color = if (message.isFromUser) Color.White else Color.Black
+                color = if (message.isFromUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
             )
         }
     }
@@ -239,15 +239,15 @@ fun MessageInputBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.White)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         IconButton(onClick = onEmojiClick) {
-            Icon(Icons.Outlined.SentimentSatisfied, contentDescription = stringResource(id = R.string.support_emoji_icon), tint = Color.Gray)
+            Icon(Icons.Outlined.SentimentSatisfied, contentDescription = stringResource(id = R.string.support_emoji_icon), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
         }
         IconButton(onClick = onCameraClick) {
-            Icon(Icons.Default.CameraAlt, contentDescription = stringResource(id = R.string.support_attach_image_icon), tint = Color.Gray)
+            Icon(Icons.Default.CameraAlt, contentDescription = stringResource(id = R.string.support_attach_image_icon), tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f))
         }
 
         TextField(
@@ -261,12 +261,16 @@ fun MessageInputBar(
                 disabledContainerColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = Color(0xFF007AFF)
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         )
 
         IconButton(onClick = onSendClick) {
-            Icon(Icons.Default.Send, contentDescription = stringResource(id = R.string.support_send_icon), tint = Color(0xFF007AFF))
+            Icon(Icons.Default.Send, contentDescription = stringResource(id = R.string.support_send_icon), tint = MaterialTheme.colorScheme.primary)
         }
     }
 }

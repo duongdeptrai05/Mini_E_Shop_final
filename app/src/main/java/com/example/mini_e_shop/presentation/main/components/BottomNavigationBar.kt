@@ -38,7 +38,7 @@ fun BottomNavigationBar(navController: NavController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar(
-        containerColor = Color.White,
+        containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 8.dp,
         windowInsets = WindowInsets(0), // tránh bị khuyết do inset mặc định
         modifier = Modifier
@@ -110,8 +110,8 @@ fun BottomNavigationBar(navController: NavController) {
                     selectedIconColor = pageColor,
                     selectedTextColor = pageColor,
                     indicatorColor = Color.Transparent, // Bỏ indicator mặc định, dùng background riêng
-                    unselectedIconColor = TextSecondary,
-                    unselectedTextColor = TextSecondary
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             )
         }

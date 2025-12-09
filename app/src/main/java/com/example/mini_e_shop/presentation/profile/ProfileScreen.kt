@@ -39,7 +39,7 @@ fun ProfileScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(BackgroundLight)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         Header(currentUser)
         Spacer(modifier = Modifier.height(20.dp))
@@ -84,7 +84,7 @@ private fun Header(user: UserEntity?) {
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
             ) {
                 Row(
@@ -113,13 +113,13 @@ private fun Header(user: UserEntity?) {
                             user?.name ?: "Khách",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = TextPrimary
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             user?.email ?: "",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = TextSecondary
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                         )
                     }
                 }
@@ -156,7 +156,7 @@ private fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
@@ -186,13 +186,13 @@ private fun MenuButton(text: String, icon: ImageVector, onClick: () -> Unit) {
                     text,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             }
             Icon(
                 Icons.Default.ChevronRight,
                 contentDescription = "Arrow",
-                tint = TextSecondary,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -209,8 +209,8 @@ private fun LogoutButton(onClick: () -> Unit) {
             .height(56.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = BackgroundCard,
-            contentColor = ErrorRed
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.error
         ),
         elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
     ) {

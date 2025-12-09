@@ -7,11 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -45,7 +45,7 @@ fun MainScreen(
             // FIX: Xử lý lỗi icon bị che khuất bởi thanh điều hướng hệ thống
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = Color.White, // Đặt màu nền giống màu của BottomNavigationBar để tràn viền đẹp mắt
+                color = MaterialTheme.colorScheme.surface, // Đồng bộ theo theme để hỗ trợ dark mode
                 tonalElevation = 8.dp // Tạo bóng nhẹ tách biệt nội dung (Material3 dùng tonalElevation thay vì shadowElevation)
             ) {
                 Column {

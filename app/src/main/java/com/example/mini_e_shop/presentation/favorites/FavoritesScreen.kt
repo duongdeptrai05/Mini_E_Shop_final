@@ -31,22 +31,22 @@ fun FavoritesScreen(
     Scaffold(
         contentWindowInsets = WindowInsets.statusBars,
         topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        stringResource(id = R.string.favorite_products),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    ) 
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = FavoritesColor.copy(alpha = 0.05f),
-                    titleContentColor = FavoritesColor
-                ),
-                windowInsets = WindowInsets.statusBars // Sử dụng statusBars để tự động tính toán padding
-            )
+        TopAppBar(
+            title = {
+                Text(
+                    stringResource(id = R.string.favorite_products),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                titleContentColor = MaterialTheme.colorScheme.onSurface
+            ),
+            windowInsets = WindowInsets.statusBars // Sử dụng statusBars để tự động tính toán padding
+        )
         },
-        containerColor = BackgroundLight
+    containerColor = MaterialTheme.colorScheme.background
     ) { padding ->
         when (val state = uiState) {
             is FavoritesUiState.Loading -> {

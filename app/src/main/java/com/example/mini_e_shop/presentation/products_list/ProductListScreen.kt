@@ -113,13 +113,13 @@ fun ProductListScreen(
                         onNavigateToAddEditProduct(null) 
                     },
                     containerColor = PrimaryIndigo,
-                    contentColor = Color.White
+                    contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Product")
                 }
             }
         },
-        containerColor = BackgroundLight,
+        containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0) // Không dùng padding từ Scaffold, tự xử lý
     ) { padding ->
         Column(
@@ -208,7 +208,7 @@ fun CompactHeader(
                 text = stringResource(R.string.dinh_manh_electronics),
                 style = MaterialTheme.typography.titleLarge, // Giảm từ headlineSmall xuống titleLarge
                 fontWeight = FontWeight.Bold,
-                color = TextPrimary
+                color = MaterialTheme.colorScheme.onSurface
             )
             Box(
                 modifier = Modifier
@@ -235,27 +235,27 @@ fun CompactHeader(
                 Text(
                     text = stringResource(R.string.search_at_dinh_manh),
                     fontSize = 14.sp,
-                    color = TextLight
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             },
             leadingIcon = {
                 Icon(
                     Icons.Default.Search,
                     contentDescription = null,
-                    tint = TextSecondary,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     modifier = Modifier.size(20.dp)
                 )
             },
             shape = RoundedCornerShape(25.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                unfocusedBorderColor = BorderLight,
+                unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                 focusedBorderColor = PrimaryIndigo,
-                unfocusedContainerColor = BackgroundCard,
-                focusedContainerColor = BackgroundCard,
-                unfocusedTextColor = TextPrimary,
-                focusedTextColor = TextPrimary,
-                unfocusedPlaceholderColor = TextLight,
-                focusedPlaceholderColor = TextLight
+                unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                focusedContainerColor = MaterialTheme.colorScheme.surface,
+                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                focusedPlaceholderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             ),
             singleLine = true,
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 14.sp)
@@ -275,15 +275,15 @@ private fun CompactSortButton(
             modifier = Modifier
                 .size(40.dp) 
                 .clip(RoundedCornerShape(12.dp))
-                .background(if(selectedSortType != SortType.NONE) PrimaryIndigo else SurfaceLight)
-                .border(1.dp, if(selectedSortType != SortType.NONE) PrimaryIndigo else BorderLight, RoundedCornerShape(12.dp))
+                .background(if(selectedSortType != SortType.NONE) PrimaryIndigo else MaterialTheme.colorScheme.surface)
+                .border(1.dp, if(selectedSortType != SortType.NONE) PrimaryIndigo else MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                 .clickable { expanded = true },
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 Icons.Default.Sort,
                 contentDescription = "Sort",
-                tint = if(selectedSortType != SortType.NONE) Color.White else TextSecondary,
+                tint = if(selectedSortType != SortType.NONE) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -314,7 +314,7 @@ private fun CompactSortButton(
             }
             Divider()
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.default_sort), color = TextSecondary) },
+                text = { Text(stringResource(R.string.default_sort), color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)) },
                 onClick = {
                     onSortTypeSelected(SortType.NONE)
                     expanded = false
@@ -350,11 +350,11 @@ private fun CategoryTabs(
                 },
                 colors = FilterChipDefaults.filterChipColors(
                     selectedContainerColor = PrimaryIndigo,
-                    selectedLabelColor = Color.White,
-                    containerColor = SurfaceLight,
-                    labelColor = TextSecondary
+                    selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    labelColor = MaterialTheme.colorScheme.onSurface
                 ),
-                border = BorderStroke(1.dp, if(isSelected) Color.Transparent else BorderLight),
+                border = BorderStroke(1.dp, if(isSelected) Color.Transparent else MaterialTheme.colorScheme.outline),
                 shape = RoundedCornerShape(20.dp),
                 modifier = Modifier.height(28.dp) // Giảm từ 32dp xuống 28dp
             )
@@ -403,7 +403,7 @@ fun ProductCard(
             .height(285.dp), // Tăng chiều cao để chứa đủ info
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-        colors = CardDefaults.cardColors(containerColor = BackgroundCard),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         onClick = { if (!isOutOfStock) onClick() }
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -438,7 +438,7 @@ fun ProductCard(
                     if (isAdmin) {
                         Row(
                             modifier = Modifier
-                                .background(Color.White.copy(alpha = 0.95f), RoundedCornerShape(8.dp))
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.95f), RoundedCornerShape(8.dp))
                                 .padding(4.dp),
                             horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
@@ -469,10 +469,10 @@ fun ProductCard(
                         Icon(
                             imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                             contentDescription = "Favorite",
-                            tint = if (isFavorite) Color.Red else Color.Gray,
+                            tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                             modifier = Modifier
                                 .size(24.dp)
-                                .background(Color.White.copy(alpha = 0.7f), CircleShape)
+                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.7f), CircleShape)
                                 .padding(2.dp)
                                 .clickable(onClick = onToggleFavorite)
                         )
@@ -488,7 +488,7 @@ fun ProductCard(
                     ) {
                         Text(
                             text = stringResource(R.string.out_of_stock_uppercase),
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.labelMedium
                         )
@@ -510,20 +510,20 @@ fun ProductCard(
                     fontWeight = FontWeight.Medium,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    color = TextPrimary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     lineHeight = 18.sp
                 )
 
                 // Tag Thương hiệu
                 Surface(
-                    color = SurfaceLight,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(4.dp),
                     modifier = Modifier.padding(vertical = 2.dp)
                 ) {
                     Text(
                         text = product.brand.uppercase(),
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                         fontSize = 10.sp
                     )
@@ -543,7 +543,7 @@ fun ProductCard(
                     Text(
                         text = "$rating",
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         fontSize = 11.sp,
                         modifier = Modifier.padding(start = 2.dp)
                     )
@@ -551,7 +551,7 @@ fun ProductCard(
                     Text(
                         text = stringResource(R.string.sold_count, soldCount),
                         style = MaterialTheme.typography.labelSmall,
-                        color = TextSecondary,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         fontSize = 11.sp
                     )
                 }
@@ -584,7 +584,7 @@ fun ProductCard(
                             Icon(
                                 Icons.Outlined.AddShoppingCart,
                                 contentDescription = "Add",
-                                tint = Color.White,
+                                tint = MaterialTheme.colorScheme.onPrimary,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
