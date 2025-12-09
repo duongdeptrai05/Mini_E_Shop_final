@@ -21,7 +21,8 @@ import androidx.compose.ui.unit.sp
 import com.example.mini_e_shop.R
 import com.example.mini_e_shop.domain.model.Order
 import com.example.mini_e_shop.ui.theme.PrimaryBlue
-
+import java.text.SimpleDateFormat // Thêm import này vào đầu file
+import java.util.Locale
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OrdersScreen(viewModel: OrderViewModel, onBack: () -> Unit) {
@@ -72,46 +73,65 @@ fun OrdersScreen(viewModel: OrderViewModel, onBack: () -> Unit) {
 
 @Composable
 fun OrderRow(order: Order) {
+    // Hàm định dạng tiền tệ (Giữ lại hàm này)
+    fun formatCurrency(amount: Double?): String {
+        return try {
+            val formatter = java.text.NumberFormat.getCurrencyInstance(java.util.Locale("vi", "VN"))
+            formatter.format(amount ?: 0.0)
+        } catch (e: Exception) {
+            "${amount} đ"
+        }
+    }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                // SỬA 1: Chuyển order.id thành String an toàn
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            // Dòng 1: Mã đơn & Ngày
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(
-                    text = stringResource(R.string.order_number, order.id.toString()),
+                    text = "Mã: ...${order.id.takeLast(8)}", // Rút gọn ID
                     fontWeight = FontWeight.Bold,
                     fontSize = 16.sp
                 )
-
-                // Kiểm tra null cho ngày tạo (nếu order.createdAt có thể null)
                 Text(
-                    text = order.createdAt ?: "Đang cập nhật", // Thêm giá trị mặc định
+                    text = order.createdAt ?: "", // Đã format đẹp từ Repository rồi
                     color = Color.Gray,
                     fontSize = 12.sp
                 )
             }
-            Spacer(modifier = Modifier.height(16.dp))
 
-            // SỬA 2: Format tiền tệ thủ công thay vì dùng stringResource format số
-            // Điều này tránh crash nếu order.totalAmount bị null hoặc sai kiểu
-            val formattedTotal = try {
-                // Giả sử totalAmount là Double
-                "%,.0f đ".format(order.totalAmount)
-            } catch (e: Exception) {
-                "${order.totalAmount} đ"
+            // Dòng 2: Trạng thái
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Trạng thái: ", fontSize = 14.sp, color = Color.Gray)
+                Text(
+                    text = order.status ?: "Đã thanh toán",
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(0xFF228B22)
+                )
             }
 
-            Text(
-                // Bạn có thể sửa string.xml dòng order_total thành: "Tổng tiền: %s"
-                text = stringResource(R.string.order_total, formattedTotal),
-                color = PrimaryBlue,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 16.sp
-            )
+            // Dòng 3: Tổng tiền
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = formatCurrency(order.totalAmount),
+                    color = PrimaryBlue,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+            }
         }
     }
 }

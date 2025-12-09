@@ -4,5 +4,6 @@ data class Order(
     val id: String,
     val userId: String,
     val totalAmount: Double,
+    val status: String?,
     val createdAt: String
 )

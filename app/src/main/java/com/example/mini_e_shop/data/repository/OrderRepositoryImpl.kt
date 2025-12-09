@@ -12,7 +12,8 @@ import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
-
+import java.text.SimpleDateFormat
+import java.util.Locale
 @Singleton
 class OrderRepositoryImpl @Inject constructor(
     private val orderDao: OrderDao
@@ -27,6 +28,9 @@ class OrderRepositoryImpl @Inject constructor(
     }
 
     override fun getOrdersForUser(userId: String): Flow<List<Order>> {
+        // Tạo formatter để chuyển Date sang chuỗi đẹp mắt (VD: 09/12/2025)
+        val dateFormatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+
         return orderDao.getOrdersByUser(userId).map { entities ->
             entities
                 .filter { it.isPaid } // Chỉ lấy các đơn hàng đã thanh toán
@@ -35,8 +39,11 @@ class OrderRepositoryImpl @Inject constructor(
                         id = entity.id,
                         userId = entity.userId,
                         totalAmount = entity.totalAmount,
-                        // Chuyển đổi Date sang String để khớp với model 'Order'
-                        createdAt = entity.createdAt.toString()
+                        // SỬA 1: Format ngày tháng đẹp ngay tại đây
+                        createdAt = dateFormatter.format(entity.createdAt),
+
+                        // SỬA 2: Thêm trường status (Giả lập trạng thái dựa trên isPaid)
+                        status = "Đã thanh toán"
                     )
                 }
         }
